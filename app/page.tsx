@@ -1,65 +1,86 @@
+import Link from "next/link";
 import Image from "next/image";
+import { ArrowBigDown, ArrowBigDownDashIcon } from "lucide-react";
+import QuickLinks from "./components/sections/home/QuickLinks";
+import Hero from "./components/sections/home/Hero";
+import About from "./components/sections/home/About";
+import Review from "./components/sections/home/Review";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-[#FAF9F7]">
+      {/* Hero Section */}
+      <Hero />
+
+      {/* About Sheikha Section */}
+      <About />
+      {/* Quick Links Section */}
+      <QuickLinks />
+
+      {/* Reviews Section */}
+      <Review />
+      {/* Latest News/Course Announcement */}
+      <section className="py-18 px-4 bg-[#F5F3F0]">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center text-[#0F3B56] mb-8 font-serif">
+            Latest News
+          </h2>
+          <div className="bg-white p-8 rounded-lg shadow-md border border-[#E5E0D9]">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0">
+                <div className="w-16 h-16 bg-[#f1f8fd] rounded-full flex items-center justify-center">
+                  <img
+                    src="/albayan-no-text.png"
+                    alt="AlBayan Academy Logo"
+                    className="h-17 mt-2"
+                  />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  New Course: Advanced Tajweed
+                </h3>
+                <p className="text-gray-700 mb-4">
+                  We're excited to announce our new Tajweed Mastery course,
+                  designed for students who want to perfect their recitation
+                  skills. This comprehensive program covers advanced rules,
+                  rhythm, and melody in Quranic recitation.{" "}
+                  <span className="font-extrabold">
+                    TODO: Make it updateable via dashboard
+                  </span>
+                </p>
+                <div className="flex items-center gap-4">
+                  <Link
+                    href="/courses"
+                    className="text-[#2C5F7C] font-semibold hover:text-[#1E4155] underline decoration-2 underline-offset-4 transition-colors"
+                  >
+                    Learn more →
+                  </Link>
+                  <span className="text-sm text-gray-600">Nov 29, 2024</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 bg-[#2C5F7C]">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-white mb-6 font-serif">
+            Ready to Begin Your Journey?
+          </h2>
+          <p className="text-xl text-gray-200 mb-8">
+            Start learning today and take the first step towards excellence.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/courses"
+            className="inline-block bg-white text-[#2C5F7C] px-8 py-3 rounded-lg font-semibold hover:bg-[#F0EDE8] transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            View All Courses
+          </Link>
         </div>
-      </main>
+      </section>
     </div>
   );
 }
