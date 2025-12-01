@@ -44,7 +44,7 @@ export default function QuickLinks() {
                          relative overflow-hidden"
             >
               {/* glow on hover */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-[#D4E3ED]/20 to-[#E8E3DC]/20 pointer-events-none" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-linear-to-br from-[#D4E3ED]/20 to-[#E8E3DC]/20 pointer-events-none" />
 
               <h3 className="text-xl font-bold font-roboto text-[#0F3B56] mb-3 group-hover:text-[#2C5F7C] transition-colors">
                 {item.title}
