@@ -8,7 +8,7 @@ import Review from "./components/sections/home/Review";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#FAF9F7]">
+    <div className="min-h-screen w-full bg-[#FAF9F7]">
       {/* Hero Section */}
       <Hero />
 
@@ -22,29 +22,30 @@ export default function Home() {
       {/* Latest News/Course Announcement */}
       <section className="py-18 px-4 bg-[#F5F3F0]">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-[#0F3B56] mb-8 font-serif">
+          <h2 className="text-3xl text-center text-[#0F3B56] mb-8 font-playfair-display">
             Latest News
           </h2>
           <div className="bg-white p-8 rounded-lg shadow-md border border-[#E5E0D9]">
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-4 sm:gap-5">
               <div className="shrink-0">
-                <div className="w-16 h-16 bg-[#f1f8fd] rounded-full flex items-center justify-center">
+                <div className="rounded-full flex items-center justify-center">
                   <img
-                    src="/albayan-no-text.png"
+                    src="/albayan.png"
                     alt="AlBayan Academy Logo"
-                    className="h-17 mt-2"
+                    className="h-30 w-20 mt-2"
                   />
                 </div>
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   New Course: Advanced Tajweed
                 </h3>
-                <p className="text-gray-700 mb-4">
-                  We're excited to announce our new Tajweed Mastery course,
-                  designed for students who want to perfect their recitation
-                  skills. This comprehensive program covers advanced rules,
-                  rhythm, and melody in Quranic recitation.{" "}
+                <p className="text-gray-700 mb-4 font-roboto">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean non metus sed felis rhoncus molestie et cursus magna.
+                  Nam luctus diam in ultricies rutrum. Sed non vehicula nisi,
+                  tristique mollis libero. Nulla sollicitudin vulputate dolor ut
+                  interdum.{" "}
                   <span className="font-extrabold">
                     TODO: Make it updateable via dashboard
                   </span>
@@ -71,7 +72,7 @@ export default function Home() {
             Ready to Begin Your Journey?
           </h2>
           <p className="text-xl text-gray-200 mb-8">
-            Start learning today and take the first step towards excellence.
+            View the courses we have to offer and take your first steps.
           </p>
           <Link
             href="/courses"
