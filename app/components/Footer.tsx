@@ -61,9 +61,9 @@ export default function Footer() {
               Contact Us
             </h4>
             <p className="text-gray-300 text-sm leading-relaxed text-center">
-              Email: info@albayanacademy.com
+              Email: albayanacademy@gmail.com
               <br />
-              Phone: +44 (0) 1234 567890
+              Phone: 00447956921241
             </p>
           </div>
         </div>
