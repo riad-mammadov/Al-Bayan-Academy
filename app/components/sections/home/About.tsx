@@ -2,23 +2,24 @@ import Link from "next/link";
 
 export default function About() {
   return (
-    <section className="py-16 px-4 bg-white">
-      <div className="max-w-6xl mx-auto">
+    <section className="py-16 px-4 sm:px-8 bg-white">
+      <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <div>
-            <h2 className="text-3xl font-bold text-[#0F3B56] mb-4 font-serif">
-              About Sheikha Bayan
+          <div className="max-w-2xl mx-auto text-left">
+            <h2 className="text-3xl text-center md:text-left text-[#0F3B56] mb-4 font-playfair-display">
+              About Ustatha Bayan Hawwa
             </h2>
-            <p className="text-lg text-gray-700 mb-4">
-              Sheikha Bayan Hawwa is a dedicated and experienced teacher of
+            <p className="text-md font-light text-gray-700 mb-4 ">
+              Ustatha Bayan Hawwa is a dedicated and experienced teacher of
               Quranic studies and Islamic education. With years of expertise in
               teaching Tajweed, Hifz, and Islamic principles, she brings passion
               and personalized attention to every student.
             </p>
-            <p className="text-gray-700 mb-6">
-              Her approach combines traditional Islamic teaching methods with
-              modern educational techniques, ensuring that each student receives
-              the guidance they need to excel in their learning journey.
+            <p className="text-gray-700 font-light mb-6">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+              non metus sed felis rhoncus molestie et cursus magna. Nam luctus
+              diam in ultricies rutrum. Sed non vehicula nisi, tristique mollis
+              libero. Nulla sollicitudin vulputate dolor ut interdum.
             </p>
             <Link
               href="/about"
