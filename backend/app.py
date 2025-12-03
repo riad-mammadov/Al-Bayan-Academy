@@ -4,9 +4,12 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
+from db import supabase
+from flask_bcrypt import Bcrypt
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 
 
 # API Routes
