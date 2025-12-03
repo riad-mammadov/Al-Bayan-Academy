@@ -20,9 +20,9 @@ export default function Home() {
       {/* Reviews Section */}
       <Review />
       {/* Latest News/Course Announcement */}
-      <section className="py-18 px-4 bg-[#F5F3F0]">
+      <section className="py-18 px-4 bg-linear-to-br from-[#F5F2EB] via-[#F5F2EB] to-[#F5F2EB]">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl text-center text-[#0F3B56] mb-8 font-playfair-display">
+          <h2 className="text-3xl text-center text-[#5b56a5] mb-8 font-playfair-display">
             Latest News
           </h2>
           <div className="bg-white p-8 rounded-lg shadow-md border border-[#E5E0D9]">
@@ -45,10 +45,7 @@ export default function Home() {
                   Aenean non metus sed felis rhoncus molestie et cursus magna.
                   Nam luctus diam in ultricies rutrum. Sed non vehicula nisi,
                   tristique mollis libero. Nulla sollicitudin vulputate dolor ut
-                  interdum.{" "}
-                  <span className="font-extrabold">
-                    TODO: Make it updateable via dashboard
-                  </span>
+                  interdum.
                 </p>
                 <div className="flex items-center gap-4">
                   <Link
@@ -72,13 +69,13 @@ export default function Home() {
             Ready to Begin Your Journey?
           </h2>
           <p className="text-xl text-gray-200 mb-8">
-            View the courses we have to offer and take your first steps.
+            View the classes we have to offer and take your first steps.
           </p>
           <Link
-            href="/courses"
+            href="/classes"
             className="inline-block bg-white text-[#2C5F7C] px-8 py-3 rounded-lg font-semibold hover:bg-[#F0EDE8] transition-colors"
           >
-            View All Courses
+            View All Classes
           </Link>
         </div>
       </section>
