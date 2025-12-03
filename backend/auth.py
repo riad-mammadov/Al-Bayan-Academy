@@ -27,4 +27,4 @@ def create_jwt(user_id, role):
         "exp": datetime.utcnow() + timedelta(hours=2),
         "iat": datetime.utcnow(),
     }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGO)
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
