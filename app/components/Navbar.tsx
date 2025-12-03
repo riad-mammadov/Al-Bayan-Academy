@@ -18,7 +18,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/60 backdrop-blur-md border-b border-[#E5E0D9]/60">
+    <nav className="sticky top-0 z-50 bg-[#2F2B66]/80 border-b-4 border-[#D9B14C]! backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -30,7 +30,11 @@ export default function Navbar() {
               height={45}
               className="object-contain"
             />
-            <span className="hidden sm:block font-roboto text-lg text-[#0F3B56] font-semibold tracking-wide">
+            <span
+              className="font-playfair-display tracking-wide text-xl text-[#ffffff] relative
+                 transition-all hover:text-[#F6CB59] cursor-pointer 
+                 "
+            >
               Al-Bayan Academy
             </span>
           </Link>
@@ -41,10 +45,10 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative text-[#0F3B56] text-[15px] font-playfair-display
-                 transition-all hover:text-[#0F3B56] 
+                className={`relative text-[#ffffff] text-md font-playfair-display
+                 transition-all hover:text-[#F6CB59] 
                  after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0
-                 after:bg-[#0F3B56] after:transition-all after:duration-300
+                 after:bg-[#F6CB59] after:transition-all after:duration-300
                  hover:after:w-full`}
               >
                 {item.label}
@@ -55,7 +59,7 @@ export default function Navbar() {
           {/* Mobile toggle */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-gray-800 hover:text-[#0F3B56] p-2 transition"
+            className="md:hidden text-white hover:text-[#0F3B56] p-2 transition"
           >
             {isOpen ? <X size={26} /> : <Menu size={26} />}
           </button>
@@ -73,7 +77,7 @@ export default function Navbar() {
               key={item.href}
               href={item.href}
               onClick={() => setIsOpen(false)}
-              className="block px-4 py-3 rounded-md bg-[#F8F6F2]/70 text-gray-800 font-serif
+              className="block px-4 py-3 rounded-md bg-[#F8F6F2]/70 text-white font-serif
                          hover:bg-[#E8E3DC] hover:text-[#0F3B56] transition-all text-[16px]"
             >
               {item.label}
