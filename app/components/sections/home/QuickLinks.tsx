@@ -6,17 +6,17 @@ export default function QuickLinks() {
     {
       title: "Get Started",
       href: "/login",
-      desc: "Create your account and view ongoing lessons and courses.",
+      desc: "Create your account and request to join lessons and classes.",
     },
     {
       title: "Bookings",
-      href: "/bookings",
+      href: "/book",
       desc: "Schedule consultations or request Sheikha Bayan for an event.",
     },
     {
-      title: "Courses",
-      href: "/courses",
-      desc: "Explore Quranic and Islamic studies programmes.",
+      title: "Classes",
+      href: "/classes",
+      desc: "View upcoming classes and the current schedule for the week.",
     },
     {
       title: "Contact",
@@ -26,10 +26,10 @@ export default function QuickLinks() {
   ];
 
   return (
-    <section className="py-20 px-6 bg-[#F8F6F2] relative">
+    <section className="py-20 px-6 bg-[#F5F2EB] relative">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <h2 className="text-3xl text-center font-playfair-display text-[#0F3B56] mb-12">
+        <h2 className="text-3xl text-center font-playfair-display text-[#5b56a5] mb-12">
           Begin Your Journey Now
         </h2>
 
@@ -43,10 +43,7 @@ export default function QuickLinks() {
                          hover:shadow-lg hover:-translate-y-1 transition-all duration-300
                          relative overflow-hidden"
             >
-              {/* glow on hover */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-linear-to-br from-[#D4E3ED]/20 to-[#E8E3DC]/20 pointer-events-none" />
-
-              <h3 className="text-xl font-bold font-roboto text-[#0F3B56] mb-3 group-hover:text-[#2C5F7C] transition-colors">
+              <h3 className="text-xl font-bold font-roboto text-[#5b56a5] mb-3 group-hover:text-[#7a74cd] transition-colors">
                 {item.title}
               </h3>
 
@@ -55,12 +52,9 @@ export default function QuickLinks() {
               </p>
 
               {/* Arrow animation */}
-              <div className="flex items-center text-[#0F3B56] font-medium group-hover:text-[#2C5F7C]">
+              <div className="flex items-center text-[#5b56a5] font-medium group-hover:text-[#F6CB59] transition duration-300">
                 <span className="mr-1">Learn more</span>
-                <ArrowRight
-                  size={18}
-                  className="transform group-hover:translate-x-1 transition-transform duration-300"
-                />
+                <ArrowRight size={18} className="" />
               </div>
             </Link>
           ))}

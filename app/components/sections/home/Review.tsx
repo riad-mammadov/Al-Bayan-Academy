@@ -7,21 +7,21 @@ export default function Review() {
       id: 1,
       name: "John Doe",
       rating: 5,
-      comment: "Placeholder for now - will scrape trustpilot API for reviews",
+      comment: "Placeholder for now - will get real reviews",
       date: "29-11-2025",
     },
     {
       id: 2,
       name: "...",
       rating: 5,
-      comment: "Placeholder for now - will scrape trustpilot API for reviews",
+      comment: "Placeholder",
       date: "29-11-2025",
     },
     {
       id: 3,
       name: "Omar Ibrahim",
       rating: 5,
-      comment: "Placeholder for now - will scrape trustpilot API for reviews",
+      comment: "Placeholder for now",
       date: "29-11-2025",
     },
   ];
@@ -29,12 +29,12 @@ export default function Review() {
     <section className="py-16 px-4 bg-white">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-12">
-          <h2 className="text-3xl text-[#0F3B56] font-playfair-display">
+          <h2 className="text-3xl text-[#5b56a5] font-playfair-display">
             Reviews
           </h2>
           <Link
             href="/reviews"
-            className="text-[#2C5F7C] font-semibold hover:text-[#1E4155] underline decoration-2 underline-offset-4 transition-colors"
+            className="text-[#5b56a5] font-semibold hover:text-[#F6CB59] underline decoration-2 underline-offset-4 transition-colors"
           >
             View all reviews →
           </Link>

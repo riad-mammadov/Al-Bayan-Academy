@@ -1,46 +1,47 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function About() {
   return (
     <section className="py-16 px-4 sm:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <div className="max-w-2xl mx-auto text-left">
-            <h2 className="text-3xl text-center md:text-left text-[#0F3B56] mb-4 font-playfair-display">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+          <div className="max-w-2xl mx-auto text-left gap-0">
+            <h2 className="text-3xl text-center md:text-left text-[#5b56a5] mb-4 font-playfair-display">
               About Ustatha Bayan Hawwa
             </h2>
-            <p className="text-md font-light text-gray-700 mb-4 ">
-              Ustatha Bayan Hawwa is a dedicated and experienced teacher of
-              Quranic studies and Islamic education. With years of expertise in
-              teaching Tajweed, Hifz, and Islamic principles, she brings passion
-              and personalized attention to every student.
+            <p className="text-sm lg:text-base font-light text-gray-700 mb-4 ">
+              Ustatha Bayan Hawwa has devoted her life to teaching the Qur’an
+              and Tajweed with passion and excellence. Through Al-Bayan Academy,
+              she has guided hundreds of students — many of whom went on to
+              achieve Ijazah and become teachers themselves — while also
+              delivering inspiring lectures and programs across the UK.
             </p>
-            <p className="text-gray-700 font-light mb-6">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
-              non metus sed felis rhoncus molestie et cursus magna. Nam luctus
-              diam in ultricies rutrum. Sed non vehicula nisi, tristique mollis
-              libero. Nulla sollicitudin vulputate dolor ut interdum.
+            <p className="text-sm lg:text-base text-gray-700 font-light mb-6">
+              Beyond teaching, she is an accomplished author in Arabic poetry,
+              known for her eloquent nasheeds and heartfelt writings that
+              inspire spiritual reflection. She has participated in many
+              community events, webinars, and educational programmes, where her
+              calm presence and depth of knowledge continue to benefit students
+              across the globe.
             </p>
             <Link
               href="/about"
-              className="inline-block text-[#2C5F7C] font-semibold hover:text-[#1E4155] underline decoration-2 underline-offset-4 transition-colors"
+              className="inline-block text-[#5b56a5] font-semibold hover:text-[#F6CB59] underline decoration-2 underline-offset-4 transition-colors"
             >
-              Learn more about Sheikha Bayan →
+              Learn more →
             </Link>
           </div>
-          <div className="relative h-64 md:h-80 rounded-lg overflow-hidden shadow-lg border border-[#E5E0D9] bg-gradient-to-br from-[#D4E3ED] to-[#E8E3DC]">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <svg
-                  className="w-20 h-20 mx-auto text-[#2C5F7C] opacity-30 mb-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                ></svg>
-                <p className="text-gray-600 text-sm">
-                  some image here (maybe of a class)
-                </p>
-              </div>
+          {/* Image Section */}
+          <div className="flex justify-center md:justify-end">
+            <div className="relative w-full max-w-sm md:max-w-md">
+              <Link href="https://www.amazon.co.uk/dp/B0DSCB139X" target="tab">
+                <img
+                  src="/book-bg.jpg"
+                  alt="Book"
+                  className="w-full max-h-64 md:max-h-72 object-cover rounded-2xl bg-[#EFECE6]"
+                />
+              </Link>
             </div>
           </div>
         </div>
