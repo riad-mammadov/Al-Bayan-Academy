@@ -1,42 +1,44 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 export default function Dashboard() {
-  return (
-    <div className="min-h-screen py-20 px-4 bg-[#F5F3F0]">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-5xl font-bold text-gray-900 mb-8">Dashboard</h1>
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-        <div className="bg-[#F0EDE8] rounded-lg shadow-md p-8 border border-[#E5E0D9]">
-          <p className="text-gray-700 mb-6">
-            Welcome to your dashboard. This is a protected area where you can
-            manage your courses, track your progress, and access your learning
-            materials.
-          </p>
+  useEffect(() => {
+    async function checkAuthAndRedirect() {
+      try {
+        const res = await fetch("http://127.0.0.1:5000/auth/me", {
+          credentials: "include",
+        });
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div className="bg-[#D4E3ED] p-6 rounded-lg border border-[#B8D4E3]">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                My Courses
-              </h2>
-              <p className="text-gray-700">
-                View and manage your enrolled courses
-              </p>
-            </div>
+        const data = await res.json();
 
-            <div className="bg-[#D4E3ED] p-6 rounded-lg border border-[#B8D4E3]">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Progress
-              </h2>
-              <p className="text-gray-700">Track your learning progress</p>
-            </div>
+        if (data.authenticated && data.user) {
+          router.push(`/dashboard/${data.user}`);
+        } else {
+          router.push("/login");
+        }
+      } catch (err) {
+        console.error("Auth check failed", err);
+        router.push("/login");
+      } finally {
+        setLoading(false);
+      }
+    }
 
-            <div className="bg-[#D4E3ED] p-6 rounded-lg border border-[#B8D4E3]">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Applications
-              </h2>
-              <p className="text-gray-700">View your course applications</p>
-            </div>
-          </div>
-        </div>
+    checkAuthAndRedirect();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen w-full text-xl">
+        Loading...
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 }

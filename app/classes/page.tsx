@@ -21,7 +21,7 @@ export default function ClassesPage() {
       <section className="py-20 px-6 bg-[#FAF9F7]">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-playfair-display text-[#5B56A5] mb-10 text-center">
-            Current Classes & Programmes
+            Our Classes & Programmes
           </h2>
 
           <p className="text-center text-gray-700 max-w-2xl mx-auto font-light mb-12">
@@ -30,47 +30,50 @@ export default function ClassesPage() {
             portal to register your interest.
           </p>
 
-          <div className="space-y-8 grid grid-cols-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
                 title: "Tajweed Level 1",
                 desc: "Foundations of pronunciation and correct articulation.",
+                icon: "📖",
               },
               {
                 title: "Tajweed Level 2",
                 desc: "Advanced rules with detailed application and practice.",
+                icon: "📚",
               },
               {
                 title: "Hifz Programme",
                 desc: "Structured memorisation with weekly revision cycles.",
+                icon: "🕌",
               },
               {
                 title: "Ijazah Preparation",
                 desc: "For advanced students aiming for sanad certification.",
+                icon: "✨",
               },
               {
                 title: "Surah Revision Circles",
                 desc: "Weekly circles focused on strengthening recitation.",
+                icon: "🔄",
               },
               {
                 title: "Teacher Training Course",
                 desc: "A full programme designed for future Quran teachers.",
+                icon: "👩‍🏫",
               },
-            ].map((item, index) => (
-              <div key={item.title} className="pb-6 border-b border-[#E5E0D9]">
-                <h3 className="text-2xl font-playfair-display text-[#0F3B56] mb-2">
-                  {index + 1}. {item.title}
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border border-[#E5E0D9] rounded-xl p-6 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-200"
+              >
+                <div className="text-4xl mb-4">{item.icon}</div>
+                <h3 className="text-xl font-playfair-display text-[#5b56a5] mb-3">
+                  {item.title}
                 </h3>
-                <p className="text-gray-700 font-light max-w-2xl">
+                <p className="text-gray-700 font-light leading-relaxed">
                   {item.desc}
                 </p>
-
-                {/* <Link
-                  href="/classes"
-                  className="inline-block mt-3 text-[#5B56A5] font-medium hover:text-[#463F87] underline decoration-2 underline-offset-4"
-                >
-                  View details
-                </Link> */}
               </div>
             ))}
           </div>
@@ -79,15 +82,15 @@ export default function ClassesPage() {
 
       {/* Structure of Lessons */}
       <section className="py-20 px-6 bg-[#F8F6F2]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto flex justify-center items-center">
           {/* Text */}
-          <div className="max-w-2xl">
-            <h2 className="text-3xl font-playfair-display text-[#5b56a5] mb-6">
+          <div className="max-w-5xl text-left">
+            <h2 className="text-3xl text-center font-playfair-display text-[#5b56a5] mb-6">
               Lesson Structure
             </h2>
 
             <p className="text-gray-700 font-light mb-4">
-              All classes begin with a recitation of Surat Al-Fātiha, followed
+              All classes begin with a recitation of Surat Al-Fatiha, followed
               by guided recitation and correction. Each session lasts between
               1.5 and 2 hours and is taught in small groups of 10 to 15 sisters
               for personalised attention.
@@ -119,8 +122,7 @@ export default function ClassesPage() {
             </p>
           </div>
 
-          {/* Image Placeholder */}
-          <div className="relative h-72 md:h-96 rounded-xl overflow-hidden shadow-lg border border-[#E5E0D9] bg-gradient-to-br from-[#D4E3ED] to-[#E8E3DC]">
+          {/* <div className="relative h-72 md:h-96 rounded-xl overflow-hidden shadow-lg border border-[#E5E0D9] bg-gradient-to-br from-[#D4E3ED] to-[#E8E3DC]">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
                 <svg
@@ -134,61 +136,96 @@ export default function ClassesPage() {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
 
-      {/* Past Courses */}
+      {/* Course Posters */}
       <section className="py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-playfair-display text-[#5b56a5] mb-10 text-center">
-            Upcoming Classes & Programmes
+          <h2 className="text-3xl font-playfair-display text-[#5b56a5] mb-4 text-center">
+            Featured Courses
           </h2>
+          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+            Scan the QR code on each poster to learn more or register for our
+            courses.
+          </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 bg-[#F0EDE8] p-6 rounded-xl border border-[#E5E0D9]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                title: "Surah Al-Waqi'ah – Correct Your Recitation",
-                desc: "6-week Tajweed and recitation improvement programme.",
+                title: "Surah Al-Waqi'ah",
+                subtitle: "Correct Your Recitation",
+                duration: "6-week programme",
+                qrCode:
+                  "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://albayan.academy/courses/waqiah",
               },
               {
-                title: "Surah Yaseen – Correct Your Recitation",
-                desc: "6 weeks with twice-weekly live Zoom sessions.",
+                title: "Surah Yaseen",
+                subtitle: "Correct Your Recitation",
+                duration: "6 weeks",
+                qrCode:
+                  "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://albayan.academy/courses/yaseen",
               },
               {
-                title: "Surah Al-Mulk – Intensive Tajweed Course",
-                desc: "4-week focused recitation programme.",
+                title: "Surah Al-Mulk",
+                subtitle: "Intensive Tajweed Course",
+                duration: "4-week programme",
+                qrCode:
+                  "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://albayan.academy/courses/mulk",
               },
               {
-                title: "Juz Amma (Parts 1 & 2)",
-                desc: "10-week course improving fluency and Tajweed.",
+                title: "Juz Amma",
+                subtitle: "Parts 1 & 2",
+                duration: "10-week course",
+                qrCode:
+                  "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://albayan.academy/courses/juz-amma",
               },
               {
-                title: "Juz Tabarak – Parts 1 & 2",
-                desc: "10–12 week structured recitation course.",
+                title: "Juz Tabarak",
+                subtitle: "Parts 1 & 2",
+                duration: "10–12 week course",
+                qrCode:
+                  "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://albayan.academy/courses/juz-tabarak",
               },
-
               {
                 title: "Tajweed for Ramadan",
-                desc: "A seasonal refresher course preparing for Ramadan.",
+                subtitle: "Seasonal Refresher",
+                duration: "Ramadan programme",
+                qrCode:
+                  "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://albayan.academy/courses/ramadan",
               },
-            ].map((item) => (
+            ].map((course) => (
               <div
-                key={item.title}
-                className="p-6 flex flex-col justify-between rounded-xl border border-[#E5E0D9] bg-white shadow-sm hover:shadow-md transition-all"
+                key={course.title}
+                className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border-2 border-[#E5E0D9] rounded-xl p-6 shadow-lg hover:shadow-xl transition-all"
               >
-                <h3 className="text-lg font-roboto text-[#5b56a5]">
-                  {item.title}
-                </h3>
-                <p className="text-gray-700 text-sm font-light mt-1">
-                  {item.desc}
-                </p>
-                <Link
-                  href="/classes"
-                  className="inline-block w-fit mt-3 text-[#5B56A5] font-medium hover:text-[#F6CB59] underline decoration-2 underline-offset-4 duration-100"
-                >
-                  Express Interest
-                </Link>
+                <div className="text-center">
+                  <h3 className="text-2xl font-playfair-display text-[#5b56a5] mb-1">
+                    {course.title}
+                  </h3>
+                  <p className="text-gray-600 font-light mb-2">
+                    {course.subtitle}
+                  </p>
+                  <p className="text-sm text-gray-500 mb-6">
+                    {course.duration}
+                  </p>
+
+                  {/* QR Code */}
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-white p-4 rounded-lg border-2 border-[#E5E0D9] shadow-sm">
+                      <img
+                        src={course.qrCode}
+                        alt={`QR Code for ${course.title}`}
+                        className="w-32 h-32"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-gray-500 italic">
+                    Scan to learn more
+                  </p>
+                </div>
               </div>
             ))}
           </div>

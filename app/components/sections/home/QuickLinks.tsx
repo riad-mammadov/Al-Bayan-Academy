@@ -43,7 +43,7 @@ export default function QuickLinks() {
                          hover:shadow-lg hover:-translate-y-1 transition-all duration-300
                          relative overflow-hidden"
             >
-              <h3 className="text-xl font-bold font-roboto text-[#5b56a5] mb-3 group-hover:text-[#7a74cd] transition-colors">
+              <h3 className="text-xl font-bold font-playfair-display text-[#5b56a5] mb-3 group-hover:text-[#7a74cd] transition-colors">
                 {item.title}
               </h3>
 
@@ -53,7 +53,7 @@ export default function QuickLinks() {
 
               {/* Arrow animation */}
               <div className="flex items-center text-[#5b56a5] font-medium group-hover:text-[#F6CB59] transition duration-300">
-                <span className="mr-1">Learn more</span>
+                <span className="mr-1">Explore</span>
                 <ArrowRight size={18} className="" />
               </div>
             </Link>

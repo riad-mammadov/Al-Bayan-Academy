@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ import { Textarea } from "../components/ui/textarea";
 import Link from "next/link";
 
 interface Bookings {
+  id: number;
   title: string;
   desc: string;
 }
@@ -23,19 +24,30 @@ interface Bookings {
 export default function BookingsPage() {
   const [selectedBooking, setSelectedBooking] = useState<Bookings | null>(null);
 
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [extraDetails, setExtraDetails] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   const studentBookings = [
     {
+      title: "Weekly Classes",
+      desc: "Request to join weekly Quran classes at specific weeks ",
+    },
+    {
       title: "One to One Lessons",
-      desc: "Request personalised Qur’an or Arabic lessons with flexible scheduling.",
+      desc: "Please contact us with a date and time for personalised lessons with flexible scheduling.",
     },
-    {
-      title: "Consultations",
-      desc: "Book a consultation for study plans, teaching guidance, or spiritual direction.",
-    },
-    {
-      title: "Teacher Assessments",
-      desc: "Request an evaluation, Ijazah testing, or teaching readiness assessment.",
-    },
+    // {
+    //   id: 8,
+    //   title: "One to One Lessons",
+    //   desc: "Request personalised Qur’an or Arabic lessons with flexible scheduling.",
+    // },
+    // {
+    //   id: 9,
+    //   title: "Consultations",
+    //   desc: "Book a consultation for study plans, teaching guidance, or spiritual direction.",
+    // },
   ];
 
   const eventBookings = [
@@ -65,8 +77,53 @@ export default function BookingsPage() {
     },
   ];
 
-  const openForm = (booking: Bookings) => setSelectedBooking(booking);
-  const closeForm = () => setSelectedBooking(null);
+  const openForm = (booking: Bookings) => {
+    setSelectedBooking(booking);
+    setDate("");
+    setTime("");
+    setExtraDetails("");
+  };
+
+  const closeForm = () => {
+    setSelectedBooking(null);
+    setSubmitting(false);
+  };
+
+  const handleSubmitRequest = async () => {
+    if (!selectedBooking || !date || !time) {
+      alert("Please select a date and time");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const res = await fetch("http://127.0.0.1:5000/classes/request-lesson", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          class_id: selectedBooking.id,
+          date,
+          time,
+          extra_details: extraDetails,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to submit request");
+      }
+
+      closeForm();
+      alert("Request submitted successfully");
+    } catch (err: any) {
+      alert(err.message || "Something went wrong");
+      setSubmitting(false);
+    }
+  };
 
   return (
     <section className="bg-white w-full min-h-screen">
@@ -91,7 +148,7 @@ export default function BookingsPage() {
             Student Bookings
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10 mb-20">
             {studentBookings.map((item) => (
               <div
                 key={item.title}
@@ -107,10 +164,16 @@ export default function BookingsPage() {
                 </div>
 
                 <button
-                  onClick={() => openForm(item)}
-                  className="mt-8 w-fit px-4 py-2 bg-[#5b56a5] text-white rounded-lg text-sm font-medium hover:bg-[#7a74cd] transition"
+                  onClick={() =>
+                    item.title === "Weekly Classes"
+                      ? (window.location.href = "/book/classes") // change this to your page
+                      : openForm(item)
+                  }
+                  className="mt-8 w-fit px-4 py-2 bg-[#5b56a5] text-white rounded-lg text-sm font-medium hover:bg-[#7a74cd] transition duration-200"
                 >
-                  Request Booking
+                  {item.title === "Weekly Classes"
+                    ? "Book Classes"
+                    : "Request Booking"}{" "}
                 </button>
               </div>
             ))}
@@ -146,64 +209,61 @@ export default function BookingsPage() {
       </section>
 
       <Dialog open={!!selectedBooking} onOpenChange={closeForm}>
-        <DialogContent className="max-w-md border border-[#E5E0D9] bg-linear-to-br from-[#FDFDFB] to-[#F8F6F2] rounded-xl">
-          <DialogHeader className="space-y-4">
-            <DialogTitle className="text-lg font-playfair-display text-[#0F3B56]">
+        <DialogContent className="max-w-md border border-[#E5E0D9] bg-white rounded-xl ">
+          <DialogHeader>
+            <DialogTitle className="font-serif font-medium text-[#5b56a5]">
               Request Booking: {selectedBooking?.title}
             </DialogTitle>
-            <DialogDescription className="font-roboto font-light text-xs">
-              Submit your request and, if a space becomes available, the class
-              will appear in your Portal. Once it does, please complete the
-              payment via the portal to gain access.
+            <DialogDescription className="text-xs text-gray-600">
+              Enter the details below to make a request. Upon acceptance of the
+              request, you will have to make the neccessary payment to recieve
+              the link to the class.
             </DialogDescription>
           </DialogHeader>
 
-          <form className="space-y-4 mt-2">
-            <div>
-              <Label
-                htmlFor="name"
-                className="text-gray-700 text-sm font-roboto"
-              >
-                Full Name
-              </Label>
+          {/* FORM FIELDS */}
+          <div className="space-y-6">
+            {/* Date */}
+            <div className="space-y-2">
+              <Label>Date</Label>
               <Input
-                id="name"
-                placeholder="Enter your name"
-                className="mt-1 bg-[#F5F3F0] border-[#D6D2CC] focus-visible:ring-[#0F3B56] placeholder:text-xs"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                placeholder="Please give the date and time"
+              />
+            </div>
+            {/* Time */}
+            <div className="space-y-2">
+              <Label>Time</Label>
+              <Input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                placeholder="Please give the date and time"
               />
             </div>
 
-            <div>
-              <Label htmlFor="email" className="text-gray-700">
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                className="mt-2 bg-[#F5F3F0] border-[#D6D2CC] focus-visible:ring-[#0F3B56] placeholder:text-xs"
-              />
-            </div>
-            <div>
-              <Label htmlFor="email" className="text-gray-700">
-                Extra Details
-              </Label>
+            {/* EXTRA DETAILS */}
+            <div className="space-y-2">
+              <Label>Extra details</Label>
               <Textarea
-                id="description"
-                placeholder="Please include helpful details such as your availability (days/times), your Qur’an level, and anything specific you would like to request."
-                className="mt-2 bg-[#F5F3F0] border-[#D6D2CC] focus-visible:ring-[#0F3B56] placeholder:text-xs"
+                value={extraDetails}
+                onChange={(e) => setExtraDetails(e.target.value)}
+                placeholder="Anything else you want to add"
               />
             </div>
+          </div>
 
-            <DialogFooter>
-              <Button
-                type="submit"
-                className="w-full bg-[#0F3B56] hover:bg-[#134768] text-white"
-              >
-                Submit Request
-              </Button>
-            </DialogFooter>
-          </form>
+          <DialogFooter>
+            <Button
+              onClick={handleSubmitRequest}
+              disabled={submitting}
+              className="w-full bg-[#5b56a5] text-white hover:bg-[#7a74cd]"
+            >
+              {submitting ? "Submitting..." : "Submit Request"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </section>
