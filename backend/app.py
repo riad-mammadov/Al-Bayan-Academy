@@ -407,33 +407,59 @@ def get_class_details(class_id):
 @app.post("/admin/classes/<int:class_id>/add-student")
 @require_auth(role="admin")
 def add_student_to_class(class_id):
-    data = request.json
+    data = request.get_json() or {}
     student_id = data.get("student_id")
 
     if not student_id:
         return jsonify({"error": "Student ID is required"}), 400
 
-    # Check if already enrolled
-    existing = (
+    # Check if class exists
+    class_res = (
+        supabase.table("classes").select("*").eq("id", class_id).single().execute()
+    )
+    if not class_res.data:
+        return jsonify({"error": "Class not found"}), 404
+
+    # Check if student exists
+    student_res = (
+        supabase.table("users")
+        .select("*")
+        .eq("id", student_id)
+        .eq("role", "student")
+        .single()
+        .execute()
+    )
+    if not student_res.data:
+        return jsonify({"error": "Student not found"}), 404
+
+    # Check if student is already enrolled
+    existing_enrollment = (
         supabase.table("class_enrollments")
         .select("*")
         .eq("class_id", class_id)
         .eq("student_id", student_id)
-        .maybe_single()
         .execute()
     )
 
-    if existing.data:
+    if existing_enrollment.data:
         return jsonify({"error": "Student is already enrolled in this class"}), 400
 
-    # Add enrollment
-    result = (
+    # Add student to class
+    enrollment_res = (
         supabase.table("class_enrollments")
-        .insert({"class_id": class_id, "student_id": student_id})
+        .insert(
+            {
+                "class_id": class_id,
+                "student_id": student_id,
+            }
+        )
         .execute()
     )
 
-    return jsonify({"ok": True, "enrollment": result.data[0] if result.data else None})
+    if not enrollment_res.data:
+        return jsonify({"error": "Failed to add student to class"}), 500
+
+    return jsonify({"ok": True, "message": "Student added successfully"}), 201
 
 
 # Remove student from class
@@ -503,7 +529,6 @@ def request_lesson():
 
     today = date.today().isoformat()
 
-
     # Prevent duplicate pending requests
     existing = (
         supabase.table("class_requests")
@@ -517,7 +542,9 @@ def request_lesson():
     if existing:
         return (
             jsonify(
-                {"error": "You already have an active one-to-one lesson. You can request another once it has been completed."}
+                {
+                    "error": "You already have an active one-to-one lesson. You can request another once it has been completed."
+                }
             ),
             400,
         )

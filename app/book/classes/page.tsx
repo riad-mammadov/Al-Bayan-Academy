@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Label } from "@/app/components/ui/label";
 import { Textarea } from "@/app/components/ui/textarea";
 import { Button } from "@/app/components/ui/button";
+import Loading from "@/app/components/ui/loading";
 
 const weeklyClasses = [
   { id: 1, day: "Monday", time: "10:00", capacity: "15" },

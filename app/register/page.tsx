@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Loading from "../components/ui/loading";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -36,6 +37,10 @@ export default function RegisterPage() {
 
     setLoading(false);
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <section className="min-h-screen w-full bg-gradient-to-b from-[#F5F2EB] to-[#FAF9F7] flex items-center justify-center px-6 py-10">

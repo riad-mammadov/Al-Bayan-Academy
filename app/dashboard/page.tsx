@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Loading from "../components/ui/loading";
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -33,11 +34,7 @@ export default function Dashboard() {
   }, [router]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen w-full text-xl">
-        Loading...
-      </div>
-    );
+    return <Loading />;
   }
 
   return null;

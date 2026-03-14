@@ -11,6 +11,7 @@ import {
 } from "@/app/components/ui/card";
 import { Label } from "@/app/components/ui/label";
 import { Input } from "@/app/components/ui/input";
+import Loading from "@/app/components/ui/loading";
 
 export default function PaymentPage() {
   const [loading, setLoading] = useState(true);
@@ -60,11 +61,7 @@ export default function PaymentPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen w-full text-xl">
-        Loading...
-      </div>
-    );
+    return <Loading />;
   }
 
   const currentMonth = new Date().toLocaleString("default", {

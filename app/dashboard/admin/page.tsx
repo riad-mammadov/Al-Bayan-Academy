@@ -245,8 +245,16 @@ function ViewClassPage({
           setClassDetails(data);
         }
       } else {
-        const data = await res.json();
-        alert(data.error || "Failed to add student");
+        let errorMessage = "Failed to add student";
+        try {
+          const data = await res.json();
+          errorMessage = data.error || errorMessage;
+        } catch (jsonError) {
+          // If response is not JSON, use status text
+          errorMessage = `Server error: ${res.status} ${res.statusText}`;
+          console.error("Response was not JSON:", await res.text());
+        }
+        alert(errorMessage);
       }
     } catch (err) {
       console.error("Error adding student", err);
@@ -766,9 +774,22 @@ export default function AdminDashboard() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {req.date
-                            ? new Date(req.date).toLocaleDateString()
-                            : "N/A"}
+                          {req.date ? (
+                            new Date(req.date).toLocaleDateString()
+                          ) : classIds.length > 0 ? (
+                            <div className="space-y-1">
+                              {classIds.map((id: number) => {
+                                const classInfo = classMap[id];
+                                return classInfo?.day ? (
+                                  <div key={id} className="text-sm">
+                                    {classInfo.day}
+                                  </div>
+                                ) : null;
+                              })}
+                            </div>
+                          ) : (
+                            "N/A"
+                          )}
                         </TableCell>
 
                         <TableCell className="text-right space-x-2">
