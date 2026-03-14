@@ -737,7 +737,7 @@ export default function StudentDashboard() {
             Welcome back, {profile.name}
           </h1>
           <p className="text-white/90 text-sm sm:text-base">
-            Your personal portal for classes and payment
+            Your personal portal for classes and updates
           </p>
         </div>
       </section>
@@ -809,7 +809,7 @@ export default function StudentDashboard() {
               </CardContent>
             </Card>
 
-            {/* PAYMENT CARD */}
+            {/* PAYMENT SUPPORT */}
             <Card className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border border-[#E5E0D9] shadow-sm">
               <CardHeader className="border-b border-[#E5E0D9]">
                 <CardTitle className="text-xl font-playfair-display text-[#0F3B56] flex items-center gap-2">
@@ -823,29 +823,23 @@ export default function StudentDashboard() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  Payment
+                  Payments
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6">
-                <Link href="/dashboard/payment">
+              <CardContent className="pt-6 space-y-3">
+                <p className="text-sm text-gray-700">
+                  Payments are handled outside this app. Use the secure payment link below.
+                </p>
+                <Link
+                  href="https://example.com/payments"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Button className="w-full bg-[#5b56a5] text-white hover:bg-[#7a74cd] shadow-sm transition-all duration-200 py-6 text-base font-medium">
-                    <svg
-                      className="w-5 h-5 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                      />
-                    </svg>
-                    Make Payment
+                    Open External Payment Link
                   </Button>
                 </Link>
               </CardContent>

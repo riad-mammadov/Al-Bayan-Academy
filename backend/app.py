@@ -282,6 +282,44 @@ def student_dashboard():
 def admin_dashboard():
     students = supabase.table("users").select("*").eq("role", "student").execute()
     classes = supabase.table("classes").select("*").execute()
+    classes_data = classes.data if classes.data else []
+
+    # Get enrollments and attach enrolled students to each class
+    enrollments_res = supabase.table("class_enrollments").select("*").execute()
+    enrollments = enrollments_res.data if enrollments_res.data else []
+
+    class_to_student_ids = {}
+    for enrollment in enrollments:
+        class_id = enrollment.get("class_id")
+        student_id = enrollment.get("student_id")
+        if not class_id or not student_id:
+            continue
+        class_to_student_ids.setdefault(class_id, []).append(student_id)
+
+    all_enrolled_student_ids = {
+        sid for ids in class_to_student_ids.values() for sid in ids
+    }
+    students_map = {}
+    if all_enrolled_student_ids:
+        enrolled_students_res = (
+            supabase.table("users")
+            .select("id, name, email")
+            .in_("id", list(all_enrolled_student_ids))
+            .execute()
+        )
+        if enrolled_students_res.data:
+            students_map = {s["id"]: s for s in enrolled_students_res.data}
+
+    classes_with_students = []
+    for cls in classes_data:
+        cls_dict = dict(cls)
+        student_ids = class_to_student_ids.get(cls.get("id"), [])
+        enrolled_students = [
+            students_map[sid] for sid in student_ids if sid in students_map
+        ]
+        cls_dict["enrolled_students"] = enrolled_students
+        cls_dict["enrolled_students_count"] = len(enrolled_students)
+        classes_with_students.append(cls_dict)
 
     # Fetch requests without nested select
     requests_res = (
@@ -310,7 +348,7 @@ def admin_dashboard():
     return jsonify(
         {
             "students": students.data if students.data else [],
-            "classes": classes.data if classes.data else [],
+            "classes": classes_with_students,
             "requests": requests_with_users,
         }
     )
