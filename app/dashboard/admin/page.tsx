@@ -45,24 +45,6 @@ const isWeeklyClass = (cls: any) => WEEK_DAYS.includes(cls.day) && cls.time;
 const dayIndex = (day?: string) => (day ? WEEK_DAYS.indexOf(day) : -1);
 
 // ===========================================================================
-// STATUS BADGE
-// ===========================================================================
-const StatusBadge = ({ status }: { status: "paid" | "unpaid" }) => {
-  const styles =
-    status === "paid"
-      ? "bg-green-100 text-green-800 border-green-200"
-      : "bg-red-100 text-red-800 border-red-200";
-
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${styles}`}
-    >
-      {status === "paid" ? "Paid" : "Unpaid"}
-    </span>
-  );
-};
-
-// ===========================================================================
 // OVERVIEW CARD
 // ===========================================================================
 const OverviewCard = ({ title, value }: { title: string; value: number }) => (
@@ -100,6 +82,10 @@ const ClassCard = ({
       <h3 className="text-lg font-playfair-display text-[#0F3B56] mb-2">
         {classItem.title || `Class ${classItem.id}`}
       </h3>
+
+      <p className="text-sm text-[#5b56a5] font-medium mb-2">
+        {(classItem.enrolled_students_count ?? classItem.enrolled_students?.length ?? 0)} student(s) enrolled
+      </p>
 
       {isWeekly ? (
         <p className="text-gray-700 text-sm mb-2">
@@ -527,7 +513,6 @@ function ViewClassPage({
                     >
                       <div className="flex-1">
                         <span className="text-[#0F3B56]">{s.name}</span>
-                        <StatusBadge status={s.payment_status} />
                       </div>
                       <Button
                         variant="ghost"
@@ -683,13 +668,12 @@ export default function AdminDashboard() {
   // MAIN ADMIN VIEW
   // ------------------------------------------------------------------------
 
-  const { students, classes, requests, payments } = dashboard;
+  const { students, classes, requests } = dashboard;
 
   // Ensure we have arrays with default empty arrays
   const studentsList = students || [];
   const classesList = classes || [];
   const requestsList = requests || [];
-  const paymentsList = payments || [];
 
   const sortedClasses = [...classesList].sort((a: any, b: any) => {
     const aWeekly = isWeeklyClass(a);
@@ -712,11 +696,6 @@ export default function AdminDashboard() {
     { title: "Total Students", value: studentsList.length },
     { title: "Pending Requests", value: requestsList.length },
     { title: "Active Classes", value: classesList.length },
-    {
-      title: "Paid Students",
-      value: paymentsList.filter((p: { status: string }) => p.status === "paid")
-        .length,
-    },
   ];
 
   const studentMap: Record<number, string> = {};
@@ -764,7 +743,7 @@ export default function AdminDashboard() {
             Admin Dashboard
           </h1>
           <p className="text-md text-gray-700 mt-2">
-            Manage students, classes, payments and requests.
+            Manage students, classes and lesson requests.
           </p>
         </div>
       </section>
@@ -805,10 +784,6 @@ export default function AdminDashboard() {
                   requestsList.map((req: any) => {
                     const student = req.users || {};
                     const classIds = req.class_ids || [];
-                    const classNames = classIds
-                      .map((id: number) => classMap[id]?.title || `Class ${id}`)
-                      .join(", ");
-
                     return (
                       <TableRow key={req.id}>
                         <TableCell>
@@ -987,25 +962,22 @@ export default function AdminDashboard() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Payment</TableHead>
+                  <TableHead>Classes Enrolled</TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
                 {filteredStudents.length > 0 ? (
                   filteredStudents.map((s: any) => {
-                    const paid = paymentsList.some(
-                      (p: { user_id: number; status: string }) =>
-                        p.user_id === s.id && p.status === "paid"
-                    );
+                    const enrolledCount = classesList.filter((c: any) =>
+                      (c.enrolled_students || []).some((st: any) => st.id === s.id)
+                    ).length;
 
                     return (
                       <TableRow key={s.id}>
                         <TableCell>{s.name || "N/A"}</TableCell>
                         <TableCell>{s.email || "N/A"}</TableCell>
-                        <TableCell>
-                          <StatusBadge status={paid ? "paid" : "unpaid"} />
-                        </TableCell>
+                        <TableCell>{enrolledCount}</TableCell>
                       </TableRow>
                     );
                   })
