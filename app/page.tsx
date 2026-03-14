@@ -20,41 +20,65 @@ export default function Home() {
       {/* Reviews Section */}
       <Review />
       {/* Latest News/Course Announcement */}
-      <section className="py-18 px-4 bg-linear-to-br from-[#F5F2EB] via-[#F5F2EB] to-[#F5F2EB]">
+      <section className="py-20 px-6 bg-gradient-to-b from-[#F5F2EB] via-[#FAF9F7] to-[#F0EDE8]">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl text-center text-[#5b56a5] mb-8 font-playfair-display">
-            Latest News
-          </h2>
-          <div className="bg-white p-8 rounded-lg shadow-md border border-[#E5E0D9]">
-            <div className="flex items-start gap-4 sm:gap-5">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl text-[#5b56a5] mb-4 font-playfair-display">
+              Latest News
+            </h2>
+            <p className="text-gray-600 font-light">
+              Stay updated with our latest courses and announcements
+            </p>
+          </div>
+          <div className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] p-8 md:p-10 rounded-xl shadow-lg border border-[#E5E0D9] hover:shadow-xl transition-all duration-200">
+            <div className="flex items-start gap-6">
               <div className="shrink-0">
-                <div className="rounded-full flex items-center justify-center">
+                <div className="rounded-lg bg-white p-3 shadow-sm border border-[#E5E0D9]">
                   <img
                     src="/albayan.png"
                     alt="AlBayan Academy Logo"
-                    className="h-30 w-20 mt-2"
+                    className="h-16 w-auto"
                   />
                 </div>
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-2xl font-playfair-display text-[#0F3B56] mb-3">
                   New Course: Advanced Tajweed
                 </h3>
-                <p className="text-gray-700 mb-4 font-roboto">
+                <p className="text-gray-700 mb-6 font-light leading-relaxed">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                   Aenean non metus sed felis rhoncus molestie et cursus magna.
                   Nam luctus diam in ultricies rutrum. Sed non vehicula nisi,
                   tristique mollis libero. Nulla sollicitudin vulputate dolor ut
                   interdum.
                 </p>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-6 pt-4 border-t border-[#E5E0D9]">
                   <Link
-                    href="/courses"
-                    className="text-[#2C5F7C] font-semibold hover:text-[#1E4155] underline decoration-2 underline-offset-4 transition-colors"
+                    href="/classes"
+                    className="text-[#5b56a5] font-medium hover:text-[#7a74cd] underline decoration-2 underline-offset-4 transition-colors flex items-center gap-2"
                   >
-                    Learn more →
+                    Learn more
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
                   </Link>
-                  <span className="text-sm text-gray-600">Nov 29, 2024</span>
+                  <span className="text-sm text-gray-500">
+                    {new Date("2024-11-29").toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
                 </div>
               </div>
             </div>
@@ -63,19 +87,33 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-[#2C5F7C]">
+      <section className="py-24 px-6 bg-gradient-to-br from-[#5b56a5] via-[#4f4a94] to-[#2C5F7C]">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-6 font-serif">
+          <h2 className="text-4xl md:text-5xl font-playfair-display text-white mb-6">
             Ready to Begin Your Journey?
           </h2>
-          <p className="text-xl text-gray-200 mb-8">
-            View the classes we have to offer and take your first steps.
+          <p className="text-xl text-gray-100 mb-10 font-light max-w-2xl mx-auto">
+            View the classes we have to offer and take your first steps toward
+            a deeper connection with the Qur'an.
           </p>
           <Link
             href="/classes"
-            className="inline-block bg-white text-[#2C5F7C] px-8 py-3 rounded-lg font-semibold hover:bg-[#F0EDE8] transition-colors"
+            className="inline-flex items-center gap-2 bg-white text-[#5b56a5] px-10 py-4 rounded-lg font-medium hover:bg-[#F0EDE8] transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 duration-200"
           >
             View All Classes
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
           </Link>
         </div>
       </section>

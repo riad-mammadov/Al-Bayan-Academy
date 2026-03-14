@@ -82,8 +82,8 @@ export default function AboutPage() {
       </section>
 
       {/* About Ustatha Bayan */}
-      <section className="py-16 px-6 bg-[#F8F6F2]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <section className="py-20 px-6 bg-gradient-to-b from-[#F8F6F2] to-white">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           {/* Image Placeholder */}
           <div className="relative h-64 sm:h-72 md:h-96 rounded-xl overflow-hidden shadow-lg border border-[#E5E0D9] bg-gradient-to-br from-[#D4E3ED] to-[#E8E3DC] order-2 md:order-1">
             <div className="absolute inset-0 flex items-center justify-center">

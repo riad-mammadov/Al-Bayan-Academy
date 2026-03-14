@@ -13,33 +13,6 @@ import {
 } from "@/app/components/ui/card";
 
 // --------------------------------------------------------------------------
-// BADGE COMPONENT
-// --------------------------------------------------------------------------
-const StatusBadge = ({ status }: { status: "paid" | "unpaid" | "pending" }) => {
-  const styles =
-    status === "paid"
-      ? "bg-green-100 text-green-800 border-green-200"
-      : status === "pending"
-      ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-      : "bg-red-100 text-red-800 border-red-200";
-
-  const text =
-    status === "paid"
-      ? "Paid"
-      : status === "pending"
-      ? "Pending Approval"
-      : "Payment Required";
-
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${styles}`}
-    >
-      {text}
-    </span>
-  );
-};
-
-// --------------------------------------------------------------------------
 // CLASS CARD
 // --------------------------------------------------------------------------
 const ClassCard = ({
@@ -74,24 +47,46 @@ const ClassCard = ({
           {classItem.title}
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent className="flex-1 flex flex-col justify-between">
         <div className="text-gray-700 text-sm mb-4 leading-relaxed space-y-2">
           {displayStatus === "accepted" ? (
             <>
               {classItem.day && classItem.time && (
                 <div className="flex items-center gap-2 text-gray-600">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
                   </svg>
-                  <span>{classItem.day}, {classItem.time}</span>
+                  <span>
+                    {classItem.day}, {classItem.time}
+                  </span>
                 </div>
               )}
 
               {classItem.meeting_link && (
                 <div className="flex items-start gap-2 text-gray-600">
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  <svg
+                    className="w-4 h-4 mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
                   </svg>
                   <Link
                     href={classItem.meeting_link}
@@ -113,10 +108,22 @@ const ClassCard = ({
               )}
               {classItem.day && classItem.time && (
                 <div className="flex items-center gap-2 text-gray-600 pt-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
                   </svg>
-                  <span>{classItem.day} at {classItem.time}</span>
+                  <span>
+                    {classItem.day} at {classItem.time}
+                  </span>
                 </div>
               )}
             </>
@@ -140,11 +147,6 @@ const ClassCard = ({
             >
               {requesting ? "Requesting..." : "Request to Join"}
             </Button>
-          )}
-          {displayStatus === "pending" && (
-            <div className="flex-1 flex items-center justify-center">
-              <StatusBadge status="pending" />
-            </div>
           )}
         </div>
       </CardContent>
@@ -201,7 +203,7 @@ const ClassDetailsView = ({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center w-full min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-12 h-12">
             <div className="absolute inset-0 border-4 border-[#5b56a5]/20 rounded-full"></div>
@@ -271,7 +273,9 @@ const ClassDetailsView = ({
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
-                  <span className="font-medium">{classInfo.day} at {classInfo.time}</span>
+                  <span className="font-medium">
+                    {classInfo.day} at {classInfo.time}
+                  </span>
                 </div>
               )}
             </div>
@@ -492,9 +496,7 @@ const ClassDetailsView = ({
                       <p className="text-xs text-white/70 uppercase tracking-wide mb-1">
                         Schedule
                       </p>
-                      <p className="text-white font-medium">
-                        {classInfo.day}
-                      </p>
+                      <p className="text-white font-medium">{classInfo.day}</p>
                       <p className="text-white/90 text-sm">{classInfo.time}</p>
                     </div>
                   </div>
@@ -650,7 +652,6 @@ export default function StudentDashboard() {
           role: "student",
           joinedDate: "",
         },
-        payment_status: data.payment_status || "unpaid",
         accepted_classes: data.accepted_classes || [],
         pending_classes: data.pending_classes || [],
         available_classes: data.available_classes || [],
@@ -720,13 +721,8 @@ export default function StudentDashboard() {
     );
   }
 
-  const {
-    profile,
-    payment_status,
-    accepted_classes,
-    pending_classes,
-    available_classes,
-  } = dashboard;
+  const { profile, accepted_classes, pending_classes, available_classes } =
+    dashboard;
 
   const accepted = accepted_classes || [];
   const available = available_classes || [];
@@ -741,7 +737,7 @@ export default function StudentDashboard() {
             Welcome back, {profile.name}
           </h1>
           <p className="text-white/90 text-sm sm:text-base">
-            Your personal portal for classes and payments
+            Your personal portal for classes and payment
           </p>
         </div>
       </section>
@@ -749,40 +745,64 @@ export default function StudentDashboard() {
       {/* BODY */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-          {/* LEFT SIDEBAR: Profile + Payment */}
           <div className="lg:col-span-4 xl:col-span-3 space-y-6">
             {/* PROFILE CARD */}
             <Card className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border border-[#E5E0D9] shadow-sm">
               <CardHeader className="border-b border-[#E5E0D9]">
                 <CardTitle className="text-xl font-playfair-display text-[#0F3B56] flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                   Profile
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
                 <div className="space-y-1">
-                  <Label className="text-xs text-gray-500 uppercase tracking-wide">Name</Label>
+                  <Label className="text-xs text-gray-500 uppercase tracking-wide">
+                    Name
+                  </Label>
                   <p className="text-[#0F3B56] font-medium">{profile.name}</p>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-gray-500 uppercase tracking-wide">Email</Label>
-                  <p className="text-[#0F3B56] text-sm break-all">{profile.email}</p>
+                  <Label className="text-xs text-gray-500 uppercase tracking-wide">
+                    Email
+                  </Label>
+                  <p className="text-[#0F3B56] text-sm break-all">
+                    {profile.email}
+                  </p>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-gray-500 uppercase tracking-wide">Role</Label>
-                  <p className="text-[#0F3B56] font-medium capitalize">{profile.role}</p>
+                  <Label className="text-xs text-gray-500 uppercase tracking-wide">
+                    Role
+                  </Label>
+                  <p className="text-[#0F3B56] font-medium capitalize">
+                    {profile.role}
+                  </p>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-gray-500 uppercase tracking-wide">Member Since</Label>
+                  <Label className="text-xs text-gray-500 uppercase tracking-wide">
+                    Member Since
+                  </Label>
                   <p className="text-[#0F3B56] text-sm">
                     {profile.joinedDate
-                      ? new Date(profile.joinedDate).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })
+                      ? new Date(profile.joinedDate).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          }
+                        )
                       : "N/A"}
                   </p>
                 </div>
@@ -792,22 +812,42 @@ export default function StudentDashboard() {
             {/* PAYMENT CARD */}
             <Card className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border border-[#E5E0D9] shadow-sm">
               <CardHeader className="border-b border-[#E5E0D9]">
-              <CardTitle className="text-xl font-playfair-display text-[#0F3B56] flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-                Payment
-              </CardTitle>
+                <CardTitle className="text-xl font-playfair-display text-[#0F3B56] flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                    />
+                  </svg>
+                  Payment
+                </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
-              <Link href="/dashboard/payment">
-                <Button className="w-full bg-[#5b56a5] text-white hover:bg-[#7a74cd] shadow-sm transition-all duration-200 py-6 text-base font-medium">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Make Payment
-                </Button>
-              </Link>
+                <Link href="/dashboard/payment">
+                  <Button className="w-full bg-[#5b56a5] text-white hover:bg-[#7a74cd] shadow-sm transition-all duration-200 py-6 text-base font-medium">
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                    Make Payment
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -816,16 +856,26 @@ export default function StudentDashboard() {
               <CardContent className="pt-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-white/80">Enrolled Classes</span>
-                    <span className="text-2xl font-bold">{accepted.length}</span>
+                    <span className="text-sm text-white/80">
+                      Enrolled Classes
+                    </span>
+                    <span className="text-2xl font-bold">
+                      {accepted.length}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-white/80">Pending Requests</span>
+                    <span className="text-sm text-white/80">
+                      Pending Requests
+                    </span>
                     <span className="text-2xl font-bold">{pending.length}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-white/80">Available Classes</span>
-                    <span className="text-2xl font-bold">{available.length}</span>
+                    <span className="text-sm text-white/80">
+                      Available Classes
+                    </span>
+                    <span className="text-2xl font-bold">
+                      {available.length}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -867,11 +917,7 @@ export default function StudentDashboard() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   {pending.map((cls: any) => (
-                    <ClassCard
-                      key={cls.id}
-                      classItem={cls}
-                      status="pending"
-                    />
+                    <ClassCard key={cls.id} classItem={cls} status="pending" />
                   ))}
                 </div>
               </div>
@@ -900,26 +946,39 @@ export default function StudentDashboard() {
             )}
 
             {/* EMPTY STATE */}
-            {accepted.length === 0 && pending.length === 0 && available.length === 0 && (
-              <Card className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border border-[#E5E0D9] shadow-sm">
-                <CardContent className="py-16 text-center">
-                  <svg className="w-20 h-20 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                  <h3 className="text-xl font-playfair-display text-[#0F3B56] mb-2">
-                    No Classes Yet
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    You haven't enrolled in any classes. Browse available classes to get started!
-                  </p>
-                  <Link href="/classes">
-                    <Button className="bg-[#5b56a5] text-white hover:bg-[#7a74cd]">
-                      Browse Classes
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            )}
+            {accepted.length === 0 &&
+              pending.length === 0 &&
+              available.length === 0 && (
+                <Card className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border border-[#E5E0D9] shadow-sm">
+                  <CardContent className="py-16 text-center">
+                    <svg
+                      className="w-20 h-20 mx-auto text-gray-300 mb-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                      />
+                    </svg>
+                    <h3 className="text-xl font-playfair-display text-[#0F3B56] mb-2">
+                      No Classes Yet
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      You haven't enrolled in any classes. Browse available
+                      classes to get started!
+                    </p>
+                    <Link href="/classes">
+                      <Button className="bg-[#5b56a5] text-white hover:bg-[#7a74cd]">
+                        Browse Classes
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )}
           </div>
         </div>
       </section>

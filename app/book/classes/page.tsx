@@ -20,6 +20,8 @@ export default function BookClassesPage() {
   const [selected, setSelected] = useState<number[]>([]);
   const [extra, setExtra] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   function toggle(id: number) {
     setSelected((prev) =>
@@ -29,10 +31,12 @@ export default function BookClassesPage() {
 
   async function handleSubmit() {
     if (selected.length < 1) {
-      alert("Please select at least one class.");
+      setError("Please select at least one class.");
       return;
     }
 
+    setError(null);
+    setSuccess(false);
     setLoading(true);
 
     const payload = {
@@ -40,17 +44,28 @@ export default function BookClassesPage() {
       extraDetails: extra,
     };
 
-    const res = await fetch("http://127.0.0.1:5000/classes/request", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch("http://127.0.0.1:5000/classes/request", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    setLoading(false);
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to submit request");
+      }
 
-    setSelected([]);
-    setExtra("");
+      setSuccess(true);
+      setSelected([]);
+      setExtra("");
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -146,25 +161,74 @@ export default function BookClassesPage() {
             placeholder="Anything you want to add or request"
             value={extra}
             onChange={(e) => setExtra(e.target.value)}
-            className="focus-visible:ring-[#5b56a5] focus-visible:border-[#5b56a5]"
+            className="focus-visible:ring-[#5b56a5] focus-visible:border-[#5b56a5] bg-[#F5F3F0]"
             style={{
               borderColor: "#E5E0D9",
             }}
           />
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+            <svg
+              className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <p className="text-red-800 text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {success && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
+            <svg
+              className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            <p className="text-green-800 text-sm">
+              Request submitted successfully!
+            </p>
+          </div>
+        )}
+
         {/* SUBMIT BUTTON */}
         <Button
           onClick={handleSubmit}
-          disabled={loading}
-          className="w-full py-3 text-white text-base font-light rounded-lg transition-all"
+          disabled={loading || success}
+          className="w-full py-3 text-white text-base font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
           style={{
-            backgroundColor: loading ? "#a3a3a3" : "#5b56a5",
+            backgroundColor: loading || success ? "#a3a3a3" : "#5b56a5",
           }}
         >
-          {loading
-            ? "Submitting..."
-            : `Submit ${selected.length > 0 ? `(${selected.length})` : ""}`}
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              Submitting...
+            </span>
+          ) : success ? (
+            "Submitted!"
+          ) : (
+            `Submit ${selected.length > 0 ? `(${selected.length})` : ""}`
+          )}
         </Button>
       </div>
     </section>

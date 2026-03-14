@@ -103,44 +103,46 @@ def register():
 
 @app.post("/auth/login")
 def login():
-    data = request.get_json() or {}
-    email = (data.get("email") or "").strip().lower()
-    password = data.get("password") or ""
+    try:
+        data = request.get_json() or {}
+        email = (data.get("email") or "").strip().lower()
+        password = data.get("password") or ""
 
-    if not email or not password:
-        return jsonify({"error": "Email and password are required"}), 400
+        if not email or not password:
+            return jsonify({"error": "Email and password are required"}), 400
 
-    res = supabase.table("users").select("*").eq("email", email).execute()
+        res = supabase.table("users").select("*").eq("email", email).execute()
 
-    if not res.data or len(res.data) == 0:
-        return jsonify({"error": "Invalid email or password"}), 400
+        if not res.data or len(res.data) == 0:
+            return jsonify({"error": "Invalid email or password"}), 400
 
-    user = res.data[0]
+        user = res.data[0]
 
-    if not check_password(user["password_hash"], password):
-        return jsonify({"error": "Invalid credentials"}), 401
+        if not check_password(user["password_hash"], password):
+            return jsonify({"error": "Invalid credentials"}), 401
 
-    token = create_jwt(user["id"], user["role"])
+        token = create_jwt(user["id"], user["role"])
 
-    resp = jsonify(
-        {
+        response_data = {
             "id": user["id"],
             "email": user["email"],
             "role": user["role"],
         }
-    )
 
-    resp.set_cookie(
-        "auth_token",
-        token,
-        httponly=True,
-        samesite="Lax",  # Changed from "None" to "Lax"
-        secure=False,  # Keep False for local HTTP development
-        # domain=None    # Ensure domain is NOT set (defaults to host)
-    )
+        resp = jsonify(response_data)
+        resp.set_cookie(
+            "auth_token",
+            token,
+            httponly=True,
+            samesite="Lax",
+            secure=False,
+            max_age=86400 * 7,  # 7 days
+        )
 
-    print(resp.headers)
-    return resp
+        return resp
+    except Exception as e:
+        print(f"Login error: {str(e)}")
+        return jsonify({"error": "An error occurred during login"}), 500
 
 
 @app.post("/auth/logout")
@@ -159,20 +161,13 @@ def student_dashboard():
 
         # Get user info
         user_res = (
-            supabase.table("users").select("*").eq("id", user_id).single().execute()
+            supabase.table("users")
+            .select("*")
+            .eq("id", user_id)
+            .maybe_single()
+            .execute()
         )
         user = user_res.data if user_res.data else {}
-
-        # Payment for this month
-        month = datetime.utcnow().strftime("%Y-%m-01")
-        # payment = (
-        #     supabase.table("payments")
-        #     .select("*")
-        #     .eq("user_id", user_id)
-        #     .eq("payment_month", month)
-        #     .maybe_single()
-        #     .execute()
-        # )
 
         # Accepted classes (enrollments) - fetch enrollments first
         accepted_enrollments_res = (
@@ -268,7 +263,6 @@ def student_dashboard():
                     "role": user.get("role", "student"),
                     "joinedDate": user.get("created_at", ""),
                 },
-                # "payment_status": payment.data["status"] if payment.data else "unpaid",
                 "accepted_classes": accepted_classes,
                 "pending_classes": pending_classes,
                 "available_classes": available_classes,
@@ -313,35 +307,30 @@ def admin_dashboard():
             req_dict["users"] = users_map[req["student_id"]]
         requests_with_users.append(req_dict)
 
-    # payments for current month
-    month = datetime.utcnow().strftime("%Y-%m-01")
-    payments = (
-        supabase.table("payments").select("*").eq("payment_month", month).execute()
-    )
-
     return jsonify(
         {
             "students": students.data if students.data else [],
             "classes": classes.data if classes.data else [],
             "requests": requests_with_users,
-            "payments": payments.data if payments.data else [],
         }
     )
 
 
-# Get class details with enrolled students
 @app.get("/admin/classes/<int:class_id>")
 @require_auth(role="admin")
 def get_class_details(class_id):
-    # Get class info
     class_res = (
-        supabase.table("classes").select("*").eq("id", class_id).single().execute()
+        supabase.table("classes")
+        .select("*")
+        .eq("id", class_id)
+        .maybe_single()
+        .execute()
     )
 
     if not class_res.data:
         return jsonify({"error": "Class not found"}), 404
 
-    # Get enrolled students - fetch enrollments first
+    # Get enrolled students
     enrollments_res = (
         supabase.table("class_enrollments")
         .select("*")
@@ -354,41 +343,18 @@ def get_class_details(class_id):
     student_ids = {e["student_id"] for e in enrollments if e.get("student_id")}
 
     # Fetch user details
-    users_map = {}
+    enrolled_students = []
     if student_ids:
         users_res = (
             supabase.table("users").select("*").in_("id", list(student_ids)).execute()
         )
         if users_res.data:
-            users_map = {u["id"]: u for u in users_res.data}
+            enrolled_students = [
+                {"id": u["id"], "name": u["name"], "email": u["email"]}
+                for u in users_res.data
+            ]
 
-    # Get payments for current month
-    month = datetime.utcnow().strftime("%Y-%m-01")
-    payments_res = (
-        supabase.table("payments").select("*").eq("payment_month", month).execute()
-    )
-    payments = payments_res.data if payments_res.data else []
-
-    # Map students with payment status
-    students_with_payment = []
-    for enrollment in enrollments:
-        student_id = enrollment.get("student_id")
-        if student_id and student_id in users_map:
-            student = users_map[student_id]
-            paid = any(
-                p["user_id"] == student["id"] and p["status"] == "paid"
-                for p in payments
-            )
-            students_with_payment.append(
-                {
-                    "id": student["id"],
-                    "name": student["name"],
-                    "email": student["email"],
-                    "payment_status": "paid" if paid else "unpaid",
-                }
-            )
-
-    # Get all students for adding to class
+    # Get all students for the "add student" dropdown
     all_students_res = (
         supabase.table("users").select("*").eq("role", "student").execute()
     )
@@ -397,7 +363,7 @@ def get_class_details(class_id):
     return jsonify(
         {
             "class": class_res.data,
-            "students": students_with_payment,
+            "students": enrolled_students,
             "all_students": all_students,
         }
     )
@@ -415,7 +381,11 @@ def add_student_to_class(class_id):
 
     # Check if class exists
     class_res = (
-        supabase.table("classes").select("*").eq("id", class_id).single().execute()
+        supabase.table("classes")
+        .select("*")
+        .eq("id", class_id)
+        .maybe_single()
+        .execute()
     )
     if not class_res.data:
         return jsonify({"error": "Class not found"}), 404
@@ -426,7 +396,7 @@ def add_student_to_class(class_id):
         .select("*")
         .eq("id", student_id)
         .eq("role", "student")
-        .single()
+        .maybe_single()
         .execute()
     )
     if not student_res.data:
@@ -577,8 +547,14 @@ def approve_request():
 
     # Get request
     req = (
-        supabase.table("class_requests").select("*").eq("id", req_id).single().execute()
+        supabase.table("class_requests")
+        .select("*")
+        .eq("id", req_id)
+        .maybe_single()
+        .execute()
     )
+    if not req.data:
+        return jsonify({"error": "Request not found"}), 404
     student_id = req.data["student_id"]
     class_ids = req.data["class_ids"]  # This is an array
 
@@ -611,26 +587,6 @@ def reject_request():
     return jsonify({"ok": True})
 
 
-@app.post("/payments/submit")
-@require_auth(role="student")
-def submit_payment():
-    user_id = request.user["sub"]
-    data = request.json
-
-    month = datetime.utcnow().strftime("%Y-%m-01")
-
-    supabase.table("payments").upsert(
-        {
-            "user_id": user_id,
-            "amount": data["amount"],
-            "payment_month": month,
-            "status": "paid",
-        }
-    ).execute()
-
-    return jsonify({"ok": True})
-
-
 # Get single class details with announcements for student
 @app.get("/student/classes/<int:class_id>")
 @require_auth(role="student")
@@ -653,7 +609,11 @@ def get_student_class_details(class_id):
 
         # Get class details
         class_res = (
-            supabase.table("classes").select("*").eq("id", class_id).single().execute()
+            supabase.table("classes")
+            .select("*")
+            .eq("id", class_id)
+            .maybe_single()
+            .execute()
         )
 
         if not class_res.data:

@@ -35,20 +35,26 @@ export default function Reviews() {
   ];
 
   return (
-    <div className="min-h-screen py-20 px-4 bg-[#F5F3F0]">
+    <div className="min-h-screen py-20 px-6 bg-gradient-to-b from-[#F5F3F0] to-[#FAF9F7]">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-5xl font-bold text-gray-900 mb-12 text-center">
-          Student Reviews
-        </h1>
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-playfair-display text-[#5b56a5] mb-4">
+            Student Reviews
+          </h1>
+          <p className="text-gray-700 max-w-2xl mx-auto font-light text-lg">
+            Hear from our students about their journey with Al-Bayan Academy
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {reviews.map((review) => (
             <div
               key={review.id}
-              className="bg-[#F0EDE8] p-6 rounded-lg shadow-md border border-[#E5E0D9]"
+              className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] p-8 rounded-xl shadow-sm border border-[#E5E0D9] hover:shadow-md transition-all duration-200"
             >
-              <div className="flex items-center mb-4">
-                <div className="flex text-[#6BA3C1]">
+              <div className="flex items-center mb-5">
+                <div className="flex text-[#F6CB59] gap-1">
                   {[...Array(review.rating)].map((_, i) => (
                     <svg
                       key={i}
@@ -61,10 +67,18 @@ export default function Reviews() {
                   ))}
                 </div>
               </div>
-              <p className="text-gray-700 mb-4">{review.comment}</p>
-              <div className="flex justify-between items-center">
-                <p className="font-semibold text-gray-900">{review.name}</p>
-                <p className="text-sm text-gray-600">{review.date}</p>
+              <p className="text-gray-700 mb-6 leading-relaxed font-light text-base">
+                "{review.comment}"
+              </p>
+              <div className="flex justify-between items-center pt-4 border-t border-[#E5E0D9]">
+                <p className="font-medium text-[#0F3B56]">{review.name}</p>
+                <p className="text-sm text-gray-500">
+                  {new Date(review.date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
               </div>
             </div>
           ))}

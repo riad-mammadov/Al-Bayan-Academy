@@ -120,15 +120,41 @@ export default function Contact() {
 
               {/* Status */}
               {status === "success" && (
-                <p className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
-                  Thank you! Your message has been sent.
-                </p>
+                <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <p>Thank you! Your message has been sent.</p>
+                </div>
               )}
 
               {status === "error" && (
-                <p className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-                  Something went wrong. Please try again.
-                </p>
+                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  <p>Something went wrong. Please try again.</p>
+                </div>
               )}
 
               {/* Button */}
@@ -154,9 +180,21 @@ export default function Contact() {
           </p>
           <p className="text-gray-700 font-light">Phone: +44 7956 921 241</p>
 
-          <div className="flex items-center justify-center mt-4 space-x-4 text-[#5b56a5]">
-            <Instagram className="cursor-pointer" />
-            <FacebookIcon className="cursor-pointer" />
+          <div className="flex items-center justify-center mt-6 space-x-6">
+            <a
+              href="#"
+              className="text-[#5b56a5] hover:text-[#7a74cd] transition-colors"
+              aria-label="Instagram"
+            >
+              <Instagram className="w-6 h-6" />
+            </a>
+            <a
+              href="#"
+              className="text-[#5b56a5] hover:text-[#7a74cd] transition-colors"
+              aria-label="Facebook"
+            >
+              <FacebookIcon className="w-6 h-6" />
+            </a>
           </div>
         </div>
       </div>

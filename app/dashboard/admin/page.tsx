@@ -147,6 +147,11 @@ function ViewClassPage({
   const [loading, setLoading] = useState(true);
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function loadClassDetails() {
@@ -174,9 +179,13 @@ function ViewClassPage({
 
   const handlePostAnnouncement = async () => {
     if (!announcement.trim()) {
-      alert("Please enter an announcement");
+      setMessage({ type: "error", text: "Please enter an announcement" });
+      setTimeout(() => setMessage(null), 3000);
       return;
     }
+
+    setSubmitting(true);
+    setMessage(null);
 
     try {
       const res = await fetch(
@@ -194,7 +203,11 @@ function ViewClassPage({
 
       if (res.ok) {
         setAnnouncement("");
-        alert("Announcement posted successfully");
+        setMessage({
+          type: "success",
+          text: "Announcement posted successfully",
+        });
+        setTimeout(() => setMessage(null), 3000);
         // Reload class details to show new announcement
         const detailsRes = await fetch(
           `http://127.0.0.1:5000/admin/classes/${classItem.id}`,
@@ -206,19 +219,30 @@ function ViewClassPage({
         }
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to post announcement");
+        setMessage({
+          type: "error",
+          text: data.error || "Failed to post announcement",
+        });
+        setTimeout(() => setMessage(null), 3000);
       }
     } catch (err) {
       console.error("Error posting announcement", err);
-      alert("Error posting announcement");
+      setMessage({ type: "error", text: "Error posting announcement" });
+      setTimeout(() => setMessage(null), 3000);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleAddStudent = async () => {
     if (!selectedStudentId) {
-      alert("Please select a student");
+      setMessage({ type: "error", text: "Please select a student" });
+      setTimeout(() => setMessage(null), 3000);
       return;
     }
+
+    setSubmitting(true);
+    setMessage(null);
 
     try {
       const res = await fetch(
@@ -234,7 +258,8 @@ function ViewClassPage({
       if (res.ok) {
         setShowAddStudent(false);
         setSelectedStudentId("");
-        alert("Student added successfully");
+        setMessage({ type: "success", text: "Student added successfully" });
+        setTimeout(() => setMessage(null), 3000);
         // Reload class details
         const detailsRes = await fetch(
           `http://127.0.0.1:5000/admin/classes/${classItem.id}`,
@@ -254,11 +279,18 @@ function ViewClassPage({
           errorMessage = `Server error: ${res.status} ${res.statusText}`;
           console.error("Response was not JSON:", await res.text());
         }
-        alert(errorMessage);
+        setMessage({
+          type: "error",
+          text: errorMessage,
+        });
+        setTimeout(() => setMessage(null), 3000);
       }
     } catch (err) {
       console.error("Error adding student", err);
-      alert("Error adding student");
+      setMessage({ type: "error", text: "Error adding student" });
+      setTimeout(() => setMessage(null), 3000);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -281,7 +313,8 @@ function ViewClassPage({
       );
 
       if (res.ok) {
-        alert("Student removed successfully");
+        setMessage({ type: "success", text: "Student removed successfully" });
+        setTimeout(() => setMessage(null), 3000);
         // Reload class details
         const detailsRes = await fetch(
           `http://127.0.0.1:5000/admin/classes/${classItem.id}`,
@@ -293,11 +326,16 @@ function ViewClassPage({
         }
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to remove student");
+        setMessage({
+          type: "error",
+          text: data.error || "Failed to remove student",
+        });
+        setTimeout(() => setMessage(null), 3000);
       }
     } catch (err) {
       console.error("Error removing student", err);
-      alert("Error removing student");
+      setMessage({ type: "error", text: "Error removing student" });
+      setTimeout(() => setMessage(null), 3000);
     }
   };
 
@@ -311,6 +349,50 @@ function ViewClassPage({
   return (
     <section className="w-full py-16 px-6 bg-white">
       <div className="max-w-7xl mx-auto space-y-10">
+        {/* Message Notification */}
+        {message && (
+          <div
+            className={`p-4 rounded-lg border ${
+              message.type === "success"
+                ? "bg-green-50 border-green-200 text-green-800"
+                : "bg-red-50 border-red-200 text-red-800"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {message.type === "success" ? (
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              )}
+              <p className="font-medium">{message.text}</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center">
           <h1 className="text-4xl font-playfair-display text-[#5b56a5]">
             {classItem.title || "Class Details"}
@@ -368,10 +450,11 @@ function ViewClassPage({
                 />
 
                 <Button
-                  className="bg-[#5b56a5] text-white hover:bg-[#7a74cd] w-full mt-3"
+                  className="bg-[#5b56a5] text-white hover:bg-[#7a74cd] w-full mt-3 disabled:opacity-50"
                   onClick={handlePostAnnouncement}
+                  disabled={submitting}
                 >
-                  Post Announcement
+                  {submitting ? "Posting..." : "Post Announcement"}
                 </Button>
               </div>
             </div>
@@ -424,11 +507,11 @@ function ViewClassPage({
                         Cancel
                       </Button>
                       <Button
-                        className="bg-[#5b56a5] text-white hover:bg-[#7a74cd]"
+                        className="bg-[#5b56a5] text-white hover:bg-[#7a74cd] disabled:opacity-50"
                         onClick={handleAddStudent}
-                        disabled={!selectedStudentId}
+                        disabled={!selectedStudentId || submitting}
                       >
-                        Add Student
+                        {submitting ? "Adding..." : "Add Student"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -599,8 +682,6 @@ export default function AdminDashboard() {
   // ------------------------------------------------------------------------
   // MAIN ADMIN VIEW
   // ------------------------------------------------------------------------
-
-  if (!dashboard) return <p>Loading...</p>;
 
   const { students, classes, requests, payments } = dashboard;
 
@@ -794,7 +875,7 @@ export default function AdminDashboard() {
 
                         <TableCell className="text-right space-x-2">
                           <Button
-                            className="bg-[#5b56a5] text-white hover:bg-[#7a74cd] text-xs px-3"
+                            className="bg-[#5b56a5] text-white hover:bg-[#7a74cd] text-xs px-3 disabled:opacity-50"
                             onClick={async () => {
                               try {
                                 const res = await fetch(
@@ -814,7 +895,10 @@ export default function AdminDashboard() {
                                 if (res.ok) {
                                   window.location.reload();
                                 } else {
-                                  alert("Failed to approve request");
+                                  const data = await res.json();
+                                  alert(
+                                    data.error || "Failed to approve request"
+                                  );
                                 }
                               } catch (err) {
                                 console.error("Error approving request", err);
@@ -826,9 +910,16 @@ export default function AdminDashboard() {
                           </Button>
 
                           <Button
-                            className="border text-xs px-3"
+                            className="border text-xs px-3 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
                             variant="ghost"
                             onClick={async () => {
+                              if (
+                                !confirm(
+                                  "Are you sure you want to reject this request?"
+                                )
+                              ) {
+                                return;
+                              }
                               try {
                                 const res = await fetch(
                                   "http://127.0.0.1:5000/admin/requests/reject",
@@ -847,7 +938,10 @@ export default function AdminDashboard() {
                                 if (res.ok) {
                                   window.location.reload();
                                 } else {
-                                  alert("Failed to reject request");
+                                  const data = await res.json();
+                                  alert(
+                                    data.error || "Failed to reject request"
+                                  );
                                 }
                               } catch (err) {
                                 console.error("Error rejecting request", err);

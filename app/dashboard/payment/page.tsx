@@ -15,6 +15,9 @@ import Loading from "@/app/components/ui/loading";
 
 export default function PaymentPage() {
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>("unpaid");
   const [amount, setAmount] = useState<string>("50.00");
@@ -40,6 +43,7 @@ export default function PaymentPage() {
         setLoading(false);
       } catch (err) {
         console.error("Failed to fetch user data", err);
+        setError("Failed to load payment information. Please try again.");
         setLoading(false);
       }
     }
@@ -58,6 +62,48 @@ export default function PaymentPage() {
     // 1. Create a payment request with GoCardless API
     // 2. Redirect user to GoCardless payment page
     // 3. Handle callback and update payment status in database
+  };
+
+  const handleManualPayment = async () => {
+    const paymentAmount = parseFloat(amount);
+    
+    if (isNaN(paymentAmount) || paymentAmount <= 0) {
+      setError("Please enter a valid payment amount");
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const res = await fetch("http://127.0.0.1:5000/payments/submit", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: paymentAmount }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to submit payment");
+      }
+
+      setSuccess(true);
+      setPaymentStatus("paid");
+      // Reload user data to reflect payment status
+      const dashboardRes = await fetch("http://127.0.0.1:5000/student/dashboard", {
+        credentials: "include",
+      });
+      if (dashboardRes.ok) {
+        const dashboardData = await dashboardRes.json();
+        setPaymentStatus(dashboardData.payment_status);
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to submit payment. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -121,6 +167,64 @@ export default function PaymentPage() {
             </CardContent>
           </Card>
 
+          {/* SUCCESS MESSAGE */}
+          {success && (
+            <Card className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 shadow-sm">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <svg
+                    className="w-6 h-6 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <div>
+                    <p className="text-green-800 font-medium">
+                      Payment submitted successfully!
+                    </p>
+                    <p className="text-green-700 text-sm mt-1">
+                      Your payment has been recorded. Thank you!
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ERROR MESSAGE */}
+          {error && (
+            <Card className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 shadow-sm">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <svg
+                    className="w-6 h-6 text-red-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  <div>
+                    <p className="text-red-800 font-medium">Error</p>
+                    <p className="text-red-700 text-sm mt-1">{error}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* PAYMENT FORM */}
           {paymentStatus !== "paid" && (
             <Card className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border border-[#E5E0D9] shadow-sm">
@@ -137,10 +241,16 @@ export default function PaymentPage() {
                   <Input
                     type="number"
                     step="0.01"
+                    min="0.01"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => {
+                      setAmount(e.target.value);
+                      setError(null);
+                      setSuccess(false);
+                    }}
                     className="bg-white border border-[#E5E0D9]"
                     placeholder="50.00"
+                    disabled={submitting}
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Enter the amount you wish to pay
@@ -149,25 +259,34 @@ export default function PaymentPage() {
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-sm text-blue-800">
-                    <strong>Secure Payment:</strong> Your payment will be
-                    processed securely through GoCardless. You will be redirected
-                    to complete the payment.
+                    <strong>Payment Options:</strong> You can pay via GoCardless
+                    (coming soon) or submit a manual payment record. For GoCardless
+                    integration, please contact support.
                   </p>
                 </div>
 
                 <div className="flex gap-4">
                   <Button
-                    onClick={handleGoCardlessPayment}
-                    className="bg-[#5b56a5] text-white hover:bg-[#7a74cd] flex-1"
+                    onClick={handleManualPayment}
+                    disabled={submitting || !amount || parseFloat(amount) <= 0}
+                    className="bg-[#5b56a5] text-white hover:bg-[#7a74cd] flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Pay with GoCardless
+                    {submitting ? (
+                      <span className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Submitting...
+                      </span>
+                    ) : (
+                      "Submit Payment"
+                    )}
                   </Button>
                   <Button
+                    onClick={handleGoCardlessPayment}
                     variant="outline"
-                    onClick={() => (window.location.href = "/dashboard/student")}
-                    className="border border-[#E5E0D9]"
+                    disabled={submitting}
+                    className="border border-[#E5E0D9] disabled:opacity-50"
                   >
-                    Cancel
+                    GoCardless (Coming Soon)
                   </Button>
                 </div>
 
@@ -177,7 +296,7 @@ export default function PaymentPage() {
                     support, please contact us at{" "}
                     <Link
                       href="/contact"
-                      className="text-[#5b56a5] underline"
+                      className="text-[#5b56a5] underline hover:text-[#7a74cd]"
                     >
                       Contact Us
                     </Link>

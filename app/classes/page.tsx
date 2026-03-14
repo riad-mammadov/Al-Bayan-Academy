@@ -65,10 +65,12 @@ export default function ClassesPage() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border border-[#E5E0D9] rounded-xl p-6 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-200"
+                className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border border-[#E5E0D9] rounded-xl p-8 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 duration-200 group"
               >
-                <div className="text-4xl mb-4">{item.icon}</div>
-                <h3 className="text-xl font-playfair-display text-[#5b56a5] mb-3">
+                <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-200">
+                  {item.icon}
+                </div>
+                <h3 className="text-xl font-playfair-display text-[#5b56a5] mb-3 group-hover:text-[#7a74cd] transition-colors">
                   {item.title}
                 </h3>
                 <p className="text-gray-700 font-light leading-relaxed">
@@ -198,7 +200,7 @@ export default function ClassesPage() {
             ].map((course) => (
               <div
                 key={course.title}
-                className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border-2 border-[#E5E0D9] rounded-xl p-6 shadow-lg hover:shadow-xl transition-all"
+                className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border-2 border-[#E5E0D9] rounded-xl p-8 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 duration-200"
               >
                 <div className="text-center">
                   <h3 className="text-2xl font-playfair-display text-[#5b56a5] mb-1">

@@ -31,10 +31,12 @@ export default function BookingsPage() {
 
   const studentBookings = [
     {
+      id: 1,
       title: "Weekly Classes",
       desc: "Request to join weekly Quran classes at specific weeks ",
     },
     {
+      id: 2,
       title: "One to One Lessons",
       desc: "Please contact us with a date and time for personalised lessons with flexible scheduling.",
     },
@@ -87,13 +89,21 @@ export default function BookingsPage() {
   const closeForm = () => {
     setSelectedBooking(null);
     setSubmitting(false);
+    setError(null);
+    setSuccess(false);
   };
+
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmitRequest = async () => {
     if (!selectedBooking || !date || !time) {
-      alert("Please select a date and time");
+      setError("Please select a date and time");
       return;
     }
+
+    setError(null);
+    setSuccess(false);
 
     try {
       setSubmitting(true);
@@ -117,10 +127,14 @@ export default function BookingsPage() {
         throw new Error(data.error || "Failed to submit request");
       }
 
-      closeForm();
-      alert("Request submitted successfully");
+      setSuccess(true);
+      setTimeout(() => {
+        closeForm();
+        setSuccess(false);
+      }, 2000);
     } catch (err: any) {
-      alert(err.message || "Something went wrong");
+      setError(err.message || "Something went wrong");
+    } finally {
       setSubmitting(false);
     }
   };
@@ -229,8 +243,12 @@ export default function BookingsPage() {
               <Input
                 type="date"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
-                placeholder="Please give the date and time"
+                onChange={(e) => {
+                  setDate(e.target.value);
+                  setError(null);
+                }}
+                className="bg-[#F5F3F0] border-[#E5E0D9]"
+                min={new Date().toISOString().split("T")[0]}
               />
             </div>
             {/* Time */}
@@ -239,8 +257,11 @@ export default function BookingsPage() {
               <Input
                 type="time"
                 value={time}
-                onChange={(e) => setTime(e.target.value)}
-                placeholder="Please give the date and time"
+                onChange={(e) => {
+                  setTime(e.target.value);
+                  setError(null);
+                }}
+                className="bg-[#F5F3F0] border-[#E5E0D9]"
               />
             </div>
 
@@ -251,17 +272,69 @@ export default function BookingsPage() {
                 value={extraDetails}
                 onChange={(e) => setExtraDetails(e.target.value)}
                 placeholder="Anything else you want to add"
+                className="bg-[#F5F3F0] border-[#E5E0D9]"
               />
             </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+                <svg
+                  className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-red-800 text-sm">{error}</p>
+              </div>
+            )}
+
+            {/* Success Message */}
+            {success && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
+                <svg
+                  className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <p className="text-green-800 text-sm">
+                  Request submitted successfully!
+                </p>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
             <Button
               onClick={handleSubmitRequest}
-              disabled={submitting}
-              className="w-full bg-[#5b56a5] text-white hover:bg-[#7a74cd]"
+              disabled={submitting || success}
+              className="w-full bg-[#5b56a5] text-white hover:bg-[#7a74cd] disabled:opacity-50"
             >
-              {submitting ? "Submitting..." : "Submit Request"}
+              {submitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Submitting...
+                </span>
+              ) : success ? (
+                "Submitted!"
+              ) : (
+                "Submit Request"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
