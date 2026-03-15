@@ -291,7 +291,7 @@ def admin_dashboard():
     class_to_student_ids = {}
     for enrollment in enrollments:
         class_id = enrollment.get("class_id")
-        student_id = enrollment.get("student_id")
+        student_id = enrollment.get("student_id") or enrollment.get("user_id")
         if not class_id or not student_id:
             continue
         class_to_student_ids.setdefault(class_id, []).append(student_id)
@@ -378,7 +378,11 @@ def get_class_details(class_id):
     enrollments = enrollments_res.data if enrollments_res.data else []
 
     # Get student IDs
-    student_ids = {e["student_id"] for e in enrollments if e.get("student_id")}
+    student_ids = {
+        e.get("student_id") or e.get("user_id")
+        for e in enrollments
+        if e.get("student_id") or e.get("user_id")
+    }
 
     # Fetch user details
     enrolled_students = []

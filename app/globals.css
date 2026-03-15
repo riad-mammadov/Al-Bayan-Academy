@@ -63,3 +63,15 @@ button {
   font-style: normal;
   font-variation-settings: "wdth" 100;
 }
+
+
+.page-surface {
+  background: linear-gradient(135deg, #fdfdfb 0%, #f8f6f2 100%);
+  border: 1px solid #e7e1d8;
+  border-radius: 0.9rem;
+  box-shadow: 0 4px 14px rgba(48, 32, 94, 0.06);
+}
+
+.soft-section {
+  background: linear-gradient(135deg, #f7f4ef 0%, #faf9f7 48%, #f2efe8 100%);
+}

@@ -40,7 +40,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${roboto.variable} ${geistMono.variable} ${playfairDisplay.variable} antialiased flex flex-col min-h-screen`}
       >
         <Navbar />
-        <main className="flex">{children}</main>
+        <main className="flex-1 w-full bg-gradient-to-br from-[#f7f4ef] via-[#faf9f7] to-[#f2efe8]">{children}</main>
         <Footer />
       </body>
     </html>

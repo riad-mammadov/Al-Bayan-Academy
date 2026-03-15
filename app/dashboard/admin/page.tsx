@@ -96,15 +96,14 @@ const ClassCard = ({
         <p className="text-gray-500 text-sm mb-2">Personalised scheduling</p>
       )}
 
-      <div className="mt-4 flex gap-2">
-        {isWeekly ? (
-          <Button
-            className="bg-[#5b56a5] text-white hover:bg-[#7a74cd] text-sm"
-            onClick={onSelect}
-          >
-            View Class
-          </Button>
-        ) : (
+      <div className="mt-4 flex gap-2 flex-wrap">
+        <Button
+          className="bg-[#5b56a5] text-white hover:bg-[#7a74cd] text-sm"
+          onClick={onSelect}
+        >
+          View Class
+        </Button>
+        {!isWeekly && (
           <Button
             variant="outline"
             className="text-sm"
@@ -333,7 +332,7 @@ function ViewClassPage({
   );
 
   return (
-    <section className="w-full py-16 px-6 bg-white">
+    <section className="w-full py-16 px-6 bg-gradient-to-br from-[#f7f4ef] via-[#faf9f7] to-[#f2efe9]">
       <div className="max-w-7xl mx-auto space-y-10">
         {/* Message Notification */}
         {message && (
@@ -735,7 +734,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <section className="bg-white min-h-screen w-full">
+    <section className="min-h-screen w-full bg-gradient-to-br from-[#f7f4ef] via-[#fbfaf8] to-[#f2efe8]">
       {/* HEADER */}
       <section className="bg-gradient-to-br from-[#F5F3F0] via-[#FAF9F7] to-[#F0EDE8] py-16 px-6">
         <div className="max-w-7xl mx-auto">
@@ -743,7 +742,7 @@ export default function AdminDashboard() {
             Admin Dashboard
           </h1>
           <p className="text-md text-gray-700 mt-2">
-            Manage students, classes and lesson requests.
+            Manage students, classes and lesson requests with a clearer, student-friendly interface.
           </p>
         </div>
       </section>
@@ -768,7 +767,7 @@ export default function AdminDashboard() {
           <h2 className="text-3xl font-playfair-display text-[#5b56a5] mb-6">
             Lesson Requests
           </h2>
-          <div className="p-8 bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border rounded-xl shadow max-h-[400px] overflow-y-auto">
+          <div className="p-8 bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border border-[#E5E0D9] rounded-xl shadow max-h-[420px] overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -948,7 +947,7 @@ export default function AdminDashboard() {
           <h2 className="text-3xl font-playfair-display text-[#5b56a5] mb-6">
             Students
           </h2>
-          <div className="p-8 bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border rounded-xl shadow max-h-[400px] overflow-y-auto">
+          <div className="p-8 bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] border border-[#E5E0D9] rounded-xl shadow max-h-[420px] overflow-y-auto">
             <Input
               type="text"
               placeholder="Search students by name..."
