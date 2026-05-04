@@ -1,76 +1,104 @@
+"use client";
+
 import Link from "next/link";
+import { reviews, trustpilotSummary } from "@/app/components/reviews.js";
+import { useState, useCallback, useEffect } from "react";
 
 export default function Review() {
-  const reviews = [
-    // Placeholders for now
-    {
-      id: 1,
-      name: "John Doe",
-      rating: 5,
-      comment: "Placeholder for now - will get real reviews",
-      date: "29-11-2025",
-    },
-    {
-      id: 2,
-      name: "...",
-      rating: 5,
-      comment: "Placeholder",
-      date: "29-11-2025",
-    },
-    {
-      id: 3,
-      name: "Omar Ibrahim",
-      rating: 5,
-      comment: "Placeholder for now",
-      date: "29-11-2025",
-    },
-  ];
-  return (
-    <section className="py-16 px-4 bg-white">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-12">
-          <h2 className="text-3xl text-[#5b56a5] font-playfair-display">
-            Reviews
-          </h2>
-          <Link
-            href="/reviews"
-            className="text-[#5b56a5] font-semibold hover:text-[#F6CB59] underline decoration-2 underline-offset-4 transition-colors"
-          >
-            View all reviews →
-          </Link>
-        </div>
+  const [current, setCurrent] = useState(0);
+  const [visible, setVisible] = useState(true);
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {reviews.map((review) => (
-            <div
-              key={review.id}
-              className="bg-[#F5F3F0] p-6 rounded-lg shadow-md border border-[#E5E0D9]"
-            >
-              <div className="flex items-center mb-4">
-                <div className="flex text-[#6BA3C1]">
-                  {[...Array(review.rating)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-700 mb-4 text-sm">{review.comment}</p>
-              <div className="flex justify-between items-center">
-                <p className="font-semibold text-gray-900 text-sm">
-                  {review.name}
-                </p>
-                <p className="text-xs text-gray-600">{review.date}</p>
-              </div>
-            </div>
+  const goTo = useCallback((index: number) => {
+    setVisible(false);
+    setTimeout(() => {
+      setCurrent((index + reviews.length) % reviews.length);
+      setVisible(true);
+    }, 400);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => goTo(current + 1), 5000);
+    return () => clearInterval(timer);
+  }, [current, goTo]);
+
+  const review = reviews[current];
+
+  return (
+    <div className="border-t border-[#E5E0D9] px-4 md:px-[7vw] py-10 bg-white">
+      <div className="flex justify-between items-baseline mb-14 flex-wrap gap-4">
+        <div>
+          <p className="text-[0.6rem] tracking-[0.22em] uppercase text-gray-400 mb-3 font-medium">
+            Testimonials
+          </p>
+          <h2 className="font-['Cormorant_Garamond',serif] font-light text-[clamp(1.8rem,3vw,2.4rem)] text-[#0F3B56]">
+            Student Reviews
+          </h2>
+        </div>
+        <a
+          href="https://uk.trustpilot.com/review/albayanacademy.co.uk"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[0.75rem] tracking-[0.15em] uppercase font-medium text-[#5b56a5] hover:text-[#F6CB59] transition-colors duration-200"
+        >
+          View all →
+        </a>
+      </div>
+      <div
+        className="max-w-4xl mx-auto text-center"
+        style={{
+          minHeight: "200px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          className="transition-all duration-400"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(8px)",
+          }}
+        >
+          {Array(5)
+            .fill(null)
+            .map((_, i) => (
+              <span key={i} className="text-[#F6CB59] text-sm">
+                ★
+              </span>
+            ))}
+        </div>
+        <p className="font-['Cormorant_Garamond',serif] italic text-[clamp(1rem,2vw,1.3rem)] leading-[1.7] text-[#0F3B56] mb-4">
+          "{review.review}"
+        </p>
+        <p className="text-[0.75rem] tracking-[0.15em] uppercase text-gray-400 font-medium">
+          {review.name} · {review.date}
+        </p>
+      </div>
+
+      <div className="flex items-center justify-center gap-4 mt-8">
+        <button
+          onClick={() => goTo(current - 1)}
+          className="text-gray-400 hover:text-[#5b56a5] transition-colors text-sm"
+        >
+          ←
+        </button>
+        <div className="flex gap-2">
+          {reviews.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className="w-1.5 h-1.5 rounded-full transition-colors"
+              style={{ background: i === current ? "#5b56a5" : "#E5E0D9" }}
+            />
           ))}
         </div>
+        <button
+          onClick={() => goTo(current + 1)}
+          className="text-gray-400 hover:text-[#5b56a5] transition-colors text-sm"
+        >
+          →
+        </button>
       </div>
-    </section>
+    </div>
   );
 }

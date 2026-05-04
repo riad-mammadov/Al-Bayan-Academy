@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { API_URL } from "@/lib/api";
+import Link from "next/link";
 import Loading from "../components/ui/loading";
 
 export default function RegisterPage() {
@@ -16,7 +18,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`http://127.0.0.1:5000/auth/register`, {
+      const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -29,7 +31,6 @@ export default function RegisterPage() {
           const errorData = await res.json();
           errorMessage = errorData.error || errorMessage;
         } catch {
-          // If response is not JSON, use status text
           errorMessage = `Server error: ${res.status} ${res.statusText}`;
         }
         setError(errorMessage);
@@ -37,7 +38,6 @@ export default function RegisterPage() {
         return;
       }
 
-      const data = await res.json();
       window.location.href = "/login";
     } catch (err) {
       console.error("Registration error:", err);
@@ -46,108 +46,133 @@ export default function RegisterPage() {
     }
   };
 
-  if (loading) {
-    return <Loading />;
-  }
+  if (loading) return <Loading />;
 
   return (
-    <section className="min-h-screen w-full bg-gradient-to-b from-[#F5F2EB] to-[#FAF9F7] flex items-center justify-center px-6 py-10">
-      <div className="max-w-md w-full bg-white rounded-xl border border-[#E5E0D9] shadow-sm p-8">
-        {/* Heading */}
-        <h1 className="text-3xl font-playfair-display text-center text-[#5b56a5] mb-4">
-          Create Account
-        </h1>
-        <p className="text-gray-600 text-center text-sm mb-8">
-          Join Al Bayan Academy and begin your journey
-        </p>
+    <div className="min-h-screen bg-[#FAF9F7] grid md:grid-cols-2">
 
-        {/* Form */}
-        <form onSubmit={handleRegister} className="space-y-6">
-          <div>
-            <label className="text-gray-700 text-sm font-light">
-              Full Name{" "}
-            </label>
-            <input
-              type="text"
-              className="w-full mt-1 px-4 py-3 border border-[#E5E0D9] bg-[#F5F3F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5b56a5]/40 focus:border-[#5b56a5]/40 transition-all"
-              placeholder="Your Name"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="text-gray-700 text-sm font-light">
-              Email Address
-            </label>
-            <input
-              type="email"
-              className="w-full mt-1 px-4 py-3 border border-[#E5E0D9] bg-[#F5F3F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5b56a5]/40 focus:border-[#5b56a5]/40 transition-all"
-              placeholder="you@example.com"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          {/* Email */}
+      {/* ── LEFT — branding panel ── */}
+      <div className="hidden md:flex flex-col justify-between bg-gradient-to-b from-[#F5F3F0] to-[#FAF9F7] border-r border-[#E5E0D9] px-[6vw] py-20">
+        <div>
+          <p className="flex items-center gap-4 text-[#5b56a5] text-[0.65rem] tracking-[0.25em] uppercase mb-16 font-medium">
+            <span className="w-8 h-px bg-[#5b56a5]" />
+            Al Bayan Academy
+          </p>
 
-          {/* Password */}
-          <div>
-            <label className="text-gray-700 text-sm font-light">Password</label>
-            <input
-              type="password"
-              className="w-full mt-1 px-4 py-3 border border-[#E5E0D9] bg-[#F5F3F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5b56a5]/40 focus:border-[#5b56a5]/40 transition-all"
-              placeholder="Create a password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          <h2 className="font-['Cormorant_Garamond',serif] font-light text-[clamp(2.5rem,4vw,3.5rem)] leading-[1.1] text-[#0F3B56] mb-6">
+            Begin your
+            <span className="italic text-[#5b56a5]"> journey</span>
+          </h2>
 
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
-              <svg
-                className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <p className="text-red-800 text-sm">{error}</p>
+          <p className="text-[0.9rem] leading-[1.85] text-gray-500 max-w-xs">
+            Create an account to request classes, view announcements and manage your Qur'an learning journey.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {[
+            "Authentic Ijazah-certified teaching",
+            "Small groups, personal attention",
+            "Flexible online scheduling",
+          ].map((item) => (
+            <div key={item} className="flex items-center gap-3">
+              <span className="w-1 h-1 rounded-full bg-[#F6CB59]" />
+              <p className="text-[0.8rem] text-gray-500">{item}</p>
             </div>
-          )}
-
-          {/* Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-[#5b56a5] hover:bg-[#4f4a94] text-white rounded-lg transition-all font-medium shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Creating account...
-              </span>
-            ) : (
-              "Create Account"
-            )}
-          </button>
-        </form>
-
-        {/* Extra Links */}
-        <div className="text-center mt-6">
-          <a href="/login" className="text-sm text-[#5b56a5] hover:underline">
-            Already have an account? Login
-          </a>
+          ))}
         </div>
       </div>
-    </section>
+
+      {/* ── RIGHT — form ── */}
+      <div className="flex items-center justify-center px-6 md:px-[6vw] py-20">
+        <div className="w-full max-w-sm">
+
+          {/* Mobile only label */}
+          <p className="flex items-center gap-4 text-[#5b56a5] text-[0.65rem] tracking-[0.25em] uppercase mb-8 font-medium md:hidden">
+            <span className="w-8 h-px bg-[#5b56a5]" />
+            Al Bayan Academy
+          </p>
+
+          <p className="text-[0.6rem] tracking-[0.22em] uppercase text-gray-400 mb-3 font-medium">
+            Student Portal
+          </p>
+          <h1 className="font-['Cormorant_Garamond',serif] font-light text-[2.2rem] text-[#0F3B56] mb-10">
+            Create account
+          </h1>
+
+          <form onSubmit={handleRegister} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[0.7rem] tracking-[0.1em] uppercase text-gray-500 font-medium">
+                Full Name
+              </label>
+              <input
+                type="text"
+                className="w-full px-4 py-3 border border-[#E5E0D9] bg-[#F5F3F0] text-[0.9rem] text-[#0F3B56] placeholder:text-gray-300 focus:outline-none focus:ring-1 focus:ring-[#5b56a5]/30 focus:border-[#5b56a5]/40 transition-all rounded-none"
+                placeholder="Your name"
+                required
+                value={name}
+                onChange={(e) => { setName(e.target.value); setError(null); }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[0.7rem] tracking-[0.1em] uppercase text-gray-500 font-medium">
+                Email Address
+              </label>
+              <input
+                type="email"
+                className="w-full px-4 py-3 border border-[#E5E0D9] bg-[#F5F3F0] text-[0.9rem] text-[#0F3B56] placeholder:text-gray-300 focus:outline-none focus:ring-1 focus:ring-[#5b56a5]/30 focus:border-[#5b56a5]/40 transition-all rounded-none"
+                placeholder="you@example.com"
+                required
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(null); }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[0.7rem] tracking-[0.1em] uppercase text-gray-500 font-medium">
+                Password
+              </label>
+              <input
+                type="password"
+                className="w-full px-4 py-3 border border-[#E5E0D9] bg-[#F5F3F0] text-[0.9rem] text-[#0F3B56] placeholder:text-gray-300 focus:outline-none focus:ring-1 focus:ring-[#5b56a5]/30 focus:border-[#5b56a5]/40 transition-all rounded-none"
+                placeholder="••••••••••"
+                required
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setError(null); }}
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 px-4 py-3 text-[0.8rem] text-red-800">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-[#5b56a5] text-white text-[0.75rem] tracking-[0.12em] uppercase font-medium hover:bg-[#4f4a94] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Creating account..." : "Create Account"}
+            </button>
+          </form>
+
+          <div className="mt-8 pt-8 border-t border-[#E5E0D9]">
+            <p className="text-[0.8rem] text-gray-400">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="text-[#5b56a5] hover:text-[#F6CB59] transition-colors duration-200 font-medium"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
   );
 }

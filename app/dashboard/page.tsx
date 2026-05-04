@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { API_URL } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import Loading from "../components/ui/loading";
 
@@ -11,7 +12,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function checkAuthAndRedirect() {
       try {
-        const res = await fetch("http://127.0.0.1:5000/auth/me", {
+        const res = await fetch(`${API_URL}/auth/me`, {
           credentials: "include",
         });
 

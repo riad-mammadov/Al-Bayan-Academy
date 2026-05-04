@@ -3,61 +3,40 @@ import { ArrowRight } from "lucide-react";
 
 export default function QuickLinks() {
   const items = [
-    {
-      title: "Get Started",
-      href: "/login",
-      desc: "Create your account and request to join lessons and classes.",
-    },
-    {
-      title: "Bookings",
-      href: "/book",
-      desc: "Schedule consultations or request Sheikha Bayan for an event.",
-    },
-    {
-      title: "Classes",
-      href: "/classes",
-      desc: "View upcoming classes and the current schedule for the week.",
-    },
-    {
-      title: "Contact",
-      href: "/contact",
-      desc: "Reach out directly for support or enquiries.",
-    },
+    { title: "Get Started", href: "/login" },
+    { title: "Bookings", href: "/book" },
+    { title: "Classes", href: "/classes" },
+    { title: "Contact", href: "/contact" },
   ];
 
   return (
-    <section className="py-20 px-6 bg-[#F5F2EB] relative">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <h2 className="text-3xl text-center font-playfair-display text-[#5b56a5] mb-12">
-          Begin Your Journey Now
-        </h2>
+    <section className="border-t border-[#E5E0D9] bg-gradient-to-br from-[#F5F3F0] to-[#FAF9F7] px-6 md:px-[6vw] py-16">
+      <div className="max-w-4xl mx-auto">
+        <p className="text-[0.6rem] tracking-[0.22em] uppercase text-gray-400 mb-8 font-medium text-center">
+          Begin Your Journey
+        </p>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-          {items.map((item) => (
-            <Link
-              key={item.title}
-              href={item.href}
-              className="group p-6 rounded-2xl bg-white border border-[#E8E3DC] shadow-sm
-                         hover:shadow-lg hover:-translate-y-1 transition-all duration-300
-                         relative overflow-hidden"
-            >
-              <h3 className="text-xl font-bold font-playfair-display text-[#5b56a5] mb-3 group-hover:text-[#7a74cd] transition-colors">
+        <div className="flex flex-wrap justify-center items-center gap-0">
+          {items.map((item, index) => (
+            <div key={item.title} className="flex items-center">
+              <Link
+                href={item.href}
+                className="group px-8 py-3 text-[0.8rem] tracking-[0.12em] uppercase font-medium text-[#5b56a5] hover:text-[#0F3B56] transition-colors duration-200"
+              >
                 {item.title}
-              </h3>
-
-              <p className="text-sm text-gray-600 leading-relaxed mb-4">
-                {item.desc}
-              </p>
-
-              {/* Arrow animation */}
-              <div className="flex items-center text-[#5b56a5] font-medium group-hover:text-[#F6CB59] transition duration-300">
-                <span className="mr-1">Explore</span>
-                <ArrowRight size={18} className="" />
-              </div>
-            </Link>
+              </Link>
+              {index < items.length - 1 && (
+                <span className="hidden md:block w-px h-3 bg-[#E5E0D9]" />
+              )}
+            </div>
           ))}
+        </div>
+
+        {/* Decorative rule */}
+        <div className="flex justify-center items-center gap-3 mt-10">
+          <div className="w-8 h-px bg-[#5b56a5]" />
+          <div className="w-3 h-px bg-[#F6CB59]" />
+          <div className="w-8 h-px bg-[#5b56a5]" />
         </div>
       </div>
     </section>

@@ -1,9 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from datetime import date, datetime
-import os
-from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+
 from db import supabase
 from auth import (
     create_jwt,
@@ -12,9 +10,8 @@ from auth import (
     require_auth,
     JWT_SECRET,
     JWT_ALGORITHM,
+    JWT_EXP_HOURS,
 )
-from flask_cors import CORS
-import jwt
 
 
 app = Flask(__name__)
@@ -24,54 +21,97 @@ CORS(
     origins=["http://127.0.0.1:3000", "http://localhost:3000"],
 )
 
+# Fields to return from the users table; never include password_hash.
+USER_PUBLIC_FIELDS = "id,name,email,role,created_at"
 
-# API Routes
-@app.route("/api/health", methods=["GET"])
+AUTH_COOKIE_NAME = "auth_token"
+AUTH_COOKIE_MAX_AGE = JWT_EXP_HOURS * 3600  # keep cookie + JWT in lockstep
+
+
+def _set_auth_cookie(resp, token):
+    resp.set_cookie(
+        AUTH_COOKIE_NAME,
+        token,
+        httponly=True,
+        samesite="Lax",
+        secure=False,  # TODO: set True behind HTTPS in production
+        max_age=AUTH_COOKIE_MAX_AGE,
+        path="/",
+    )
+
+
+def _clear_auth_cookie(resp):
+    resp.set_cookie(
+        AUTH_COOKIE_NAME,
+        "",
+        httponly=True,
+        samesite="Lax",
+        secure=False,
+        expires=0,
+        max_age=0,
+        path="/",
+    )
+
+
+# ── Health ──────────────────────────────────────────────────────────────────
+@app.get("/api/health")
 def health():
     return jsonify({"status": "healthy"}), 200
 
 
-# Auth status route
+# ── Auth ────────────────────────────────────────────────────────────────────
 @app.get("/auth/me")
 def me():
-    token = request.cookies.get("auth_token")
+    token = request.cookies.get(AUTH_COOKIE_NAME)
     if not token:
         return jsonify({"authenticated": False})
 
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return jsonify({"authenticated": True, "user": payload["role"]})
-    except:
+    except jwt.PyJWTError:
         return jsonify({"authenticated": False})
 
+    user_id = payload.get("sub")
+    role = payload.get("role")
 
-# Account Routes
+    user = None
+    if user_id is not None:
+        try:
+            uid = int(user_id)
+        except (TypeError, ValueError):
+            uid = user_id
+        user_res = (
+            supabase.table("users")
+            .select(USER_PUBLIC_FIELDS)
+            .eq("id", uid)
+            .maybe_single()
+            .execute()
+        )
+        user = user_res.data if user_res and user_res.data else None
+
+    return jsonify({"authenticated": True, "role": role, "user": user})
+
+
 @app.post("/auth/register")
 def register():
     data = request.get_json() or {}
     email = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
-    name = data.get("name") or ""
+    name = (data.get("name") or "").strip()
 
     if not email or not password or not name:
-        return jsonify({"error": "Email, Name and password are required"}), 400
+        return jsonify({"error": "Email, name and password are required"}), 400
 
-    # Check if user exists in DB
     existing_res = supabase.table("users").select("id").eq("email", email).execute()
-
     if existing_res.data:
         return jsonify({"error": "Email is already in use"}), 400
 
-    # Hash password
-    password_hash = hash_password(password)
-
-    # Insert user with default role student
     insert_res = (
         supabase.table("users")
         .insert(
             {
                 "email": email,
-                "password_hash": password_hash,
+                "password_hash": hash_password(password),
                 "role": "student",
                 "name": name,
             }
@@ -83,21 +123,12 @@ def register():
         return jsonify({"error": "Failed to create user, please try again."}), 500
 
     user = insert_res.data[0]
-
     token = create_jwt(user["id"], user["role"])
 
     resp = jsonify(
-        {
-            "id": user["id"],
-            "email": user["email"],
-            "role": user["role"],
-        }
+        {"id": user["id"], "email": user["email"], "role": user["role"]}
     )
-    resp.set_cookie(
-        "auth_token",
-        token,
-        httponly=True,
-    )
+    _set_auth_cookie(resp, token)
     return resp, 201
 
 
@@ -112,33 +143,19 @@ def login():
             return jsonify({"error": "Email and password are required"}), 400
 
         res = supabase.table("users").select("*").eq("email", email).execute()
-
-        if not res.data or len(res.data) == 0:
+        if not res.data:
             return jsonify({"error": "Invalid email or password"}), 400
 
         user = res.data[0]
-
         if not check_password(user["password_hash"], password):
             return jsonify({"error": "Invalid credentials"}), 401
 
         token = create_jwt(user["id"], user["role"])
 
-        response_data = {
-            "id": user["id"],
-            "email": user["email"],
-            "role": user["role"],
-        }
-
-        resp = jsonify(response_data)
-        resp.set_cookie(
-            "auth_token",
-            token,
-            httponly=True,
-            samesite="Lax",
-            secure=False,
-            max_age=86400 * 7,  # 7 days
+        resp = jsonify(
+            {"id": user["id"], "email": user["email"], "role": user["role"]}
         )
-
+        _set_auth_cookie(resp, token)
         return resp
     except Exception as e:
         print(f"Login error: {str(e)}")
@@ -148,44 +165,48 @@ def login():
 @app.post("/auth/logout")
 def logout():
     resp = jsonify({"ok": True})
-    resp.set_cookie("auth_token", "", expires=0)
+    _clear_auth_cookie(resp)
     return resp
 
 
-# Student Dashboard route
+# ── Helpers ─────────────────────────────────────────────────────────────────
+def _current_user_id():
+    """Return the authenticated user id as an int (matches DB schema)."""
+    sub = request.user["sub"]
+    try:
+        return int(sub)
+    except (TypeError, ValueError):
+        return sub
+
+
+# ── Student dashboard ───────────────────────────────────────────────────────
 @app.get("/student/dashboard")
 @require_auth(role="student")
 def student_dashboard():
     try:
-        user_id = request.user["sub"]
+        user_id = _current_user_id()
 
-        # Get user info
         user_res = (
             supabase.table("users")
-            .select("*")
+            .select(USER_PUBLIC_FIELDS)
             .eq("id", user_id)
             .maybe_single()
             .execute()
         )
-        user = user_res.data if user_res.data else {}
+        user = user_res.data if user_res and user_res.data else {}
 
-        # Accepted classes (enrollments) - fetch enrollments first
+        # Enrolled classes
         accepted_enrollments_res = (
             supabase.table("class_enrollments")
             .select("*")
             .eq("student_id", user_id)
             .execute()
         )
-        accepted_enrollments = (
-            accepted_enrollments_res.data if accepted_enrollments_res.data else []
-        )
-
-        # Get class IDs from enrollments
+        accepted_enrollments = accepted_enrollments_res.data or []
         enrolled_class_ids = {
             e["class_id"] for e in accepted_enrollments if e.get("class_id")
         }
 
-        # Fetch class details for enrolled classes
         accepted_classes = []
         if enrolled_class_ids:
             enrolled_classes_res = (
@@ -194,26 +215,21 @@ def student_dashboard():
                 .in_("id", list(enrolled_class_ids))
                 .execute()
             )
-            enrolled_classes_data = (
-                enrolled_classes_res.data if enrolled_classes_res.data else []
-            )
-            # Create a map for quick lookup
-            class_map = {c["id"]: c for c in enrolled_classes_data}
-            # Format accepted classes
-            for e in accepted_enrollments:
-                class_id = e.get("class_id")
-                if class_id and class_id in class_map:
-                    class_data = class_map[class_id]
-                    accepted_classes.append(
-                        {
-                            "id": class_data.get("id"),
-                            "title": class_data.get("title", ""),
-                            "day": class_data.get("day", ""),
-                            "time": class_data.get("time", ""),
-                            "meeting_link": class_data.get("meeting_link", ""),
-                            "description": class_data.get("description", ""),
-                        }
-                    )
+            class_map = {c["id"]: c for c in (enrolled_classes_res.data or [])}
+            for cid in enrolled_class_ids:
+                c = class_map.get(cid)
+                if not c:
+                    continue
+                accepted_classes.append(
+                    {
+                        "id": c.get("id"),
+                        "title": c.get("title", ""),
+                        "day": c.get("day", ""),
+                        "time": c.get("time", ""),
+                        "meeting_link": c.get("meeting_link", ""),
+                        "description": c.get("description", ""),
+                    }
+                )
 
         # Pending requests
         pending_requests_res = (
@@ -223,15 +239,15 @@ def student_dashboard():
             .eq("status", "pending")
             .execute()
         )
-        pending_requests = (
-            pending_requests_res.data if pending_requests_res.data else []
-        )
+        pending_requests = pending_requests_res.data or []
 
-        # Get class details for pending requests
         pending_class_ids = set()
         for req in pending_requests:
-            if req.get("class_ids"):
-                pending_class_ids.update(req["class_ids"])
+            for cid in req.get("class_ids") or []:
+                try:
+                    pending_class_ids.add(int(cid))
+                except (ValueError, TypeError):
+                    pass
 
         pending_classes = []
         if pending_class_ids:
@@ -241,14 +257,25 @@ def student_dashboard():
                 .in_("id", list(pending_class_ids))
                 .execute()
             )
-            pending_classes = (
-                pending_classes_res.data if pending_classes_res.data else []
-            )
+            class_map = {c["id"]: c for c in (pending_classes_res.data or [])}
+
+            for req in pending_requests:
+                for cid in req.get("class_ids") or []:
+                    try:
+                        cid = int(cid)
+                    except (ValueError, TypeError):
+                        continue
+                    if cid in class_map:
+                        c = dict(class_map[cid])
+                        if req.get("date"):
+                            c["date"] = req["date"]
+                        if req.get("time"):
+                            c["request_time"] = req["time"]
+                        pending_classes.append(c)
 
         # Available classes (not enrolled and not pending)
         all_classes_res = supabase.table("classes").select("*").execute()
-        all_classes = all_classes_res.data if all_classes_res.data else []
-
+        all_classes = all_classes_res.data or []
         available_classes = [
             c
             for c in all_classes
@@ -269,86 +296,53 @@ def student_dashboard():
             }
         )
     except Exception as e:
-        print(f"Error in student_dashboard: {str(e)}")
         import traceback
 
         traceback.print_exc()
         return jsonify({"error": f"Failed to load dashboard: {str(e)}"}), 500
 
 
-# Admin Dashboard
+# ── Admin dashboard ─────────────────────────────────────────────────────────
 @app.get("/admin/dashboard")
 @require_auth(role="admin")
 def admin_dashboard():
-    students = supabase.table("users").select("*").eq("role", "student").execute()
+    students = (
+        supabase.table("users")
+        .select(USER_PUBLIC_FIELDS)
+        .eq("role", "student")
+        .execute()
+    )
     classes = supabase.table("classes").select("*").execute()
-    classes_data = classes.data if classes.data else []
 
-    # Get enrollments and attach enrolled students to each class
-    enrollments_res = supabase.table("class_enrollments").select("*").execute()
-    enrollments = enrollments_res.data if enrollments_res.data else []
-
-    class_to_student_ids = {}
-    for enrollment in enrollments:
-        class_id = enrollment.get("class_id")
-        student_id = enrollment.get("student_id") or enrollment.get("user_id")
-        if not class_id or not student_id:
-            continue
-        class_to_student_ids.setdefault(class_id, []).append(student_id)
-
-    all_enrolled_student_ids = {
-        sid for ids in class_to_student_ids.values() for sid in ids
-    }
-    students_map = {}
-    if all_enrolled_student_ids:
-        enrolled_students_res = (
-            supabase.table("users")
-            .select("id, name, email")
-            .in_("id", list(all_enrolled_student_ids))
-            .execute()
-        )
-        if enrolled_students_res.data:
-            students_map = {s["id"]: s for s in enrolled_students_res.data}
-
-    classes_with_students = []
-    for cls in classes_data:
-        cls_dict = dict(cls)
-        student_ids = class_to_student_ids.get(cls.get("id"), [])
-        enrolled_students = [
-            students_map[sid] for sid in student_ids if sid in students_map
-        ]
-        cls_dict["enrolled_students"] = enrolled_students
-        cls_dict["enrolled_students_count"] = len(enrolled_students)
-        classes_with_students.append(cls_dict)
-
-    # Fetch requests without nested select
     requests_res = (
         supabase.table("class_requests").select("*").eq("status", "pending").execute()
     )
-    requests_data = requests_res.data if requests_res.data else []
+    requests_data = requests_res.data or []
 
-    # Fetch user details for requests
     student_ids = {req["student_id"] for req in requests_data if req.get("student_id")}
     users_map = {}
     if student_ids:
         users_res = (
-            supabase.table("users").select("*").in_("id", list(student_ids)).execute()
+            supabase.table("users")
+            .select(USER_PUBLIC_FIELDS)
+            .in_("id", list(student_ids))
+            .execute()
         )
         if users_res.data:
-            users_map = {u["id"]: u for u in users_res.data}
+            users_map = {int(u["id"]): u for u in users_res.data}
 
-    # Attach user data to requests
     requests_with_users = []
     for req in requests_data:
         req_dict = dict(req)
-        if req.get("student_id") in users_map:
-            req_dict["users"] = users_map[req["student_id"]]
+        sid = req.get("student_id")
+        if sid is not None and int(sid) in users_map:
+            req_dict["users"] = users_map[int(sid)]
         requests_with_users.append(req_dict)
 
     return jsonify(
         {
-            "students": students.data if students.data else [],
-            "classes": classes_with_students,
+            "students": students.data or [],
+            "classes": classes.data or [],
             "requests": requests_with_users,
         }
     )
@@ -364,127 +358,116 @@ def get_class_details(class_id):
         .maybe_single()
         .execute()
     )
-
-    if not class_res.data:
+    if not class_res or not class_res.data:
         return jsonify({"error": "Class not found"}), 404
 
-    # Get enrolled students
     enrollments_res = (
         supabase.table("class_enrollments")
         .select("*")
         .eq("class_id", class_id)
         .execute()
     )
-    enrollments = enrollments_res.data if enrollments_res.data else []
+    enrollments = enrollments_res.data or []
+    student_ids = {e["student_id"] for e in enrollments if e.get("student_id")}
 
-    # Get student IDs
-    student_ids = {
-        e.get("student_id") or e.get("user_id")
-        for e in enrollments
-        if e.get("student_id") or e.get("user_id")
-    }
-
-    # Fetch user details
     enrolled_students = []
     if student_ids:
         users_res = (
-            supabase.table("users").select("*").in_("id", list(student_ids)).execute()
+            supabase.table("users")
+            .select(USER_PUBLIC_FIELDS)
+            .in_("id", list(student_ids))
+            .execute()
         )
-        if users_res.data:
-            enrolled_students = [
-                {"id": u["id"], "name": u["name"], "email": u["email"]}
-                for u in users_res.data
-            ]
+        enrolled_students = [
+            {"id": u["id"], "name": u["name"], "email": u["email"]}
+            for u in (users_res.data or [])
+        ]
 
-    # Get all students for the "add student" dropdown
     all_students_res = (
-        supabase.table("users").select("*").eq("role", "student").execute()
+        supabase.table("users")
+        .select(USER_PUBLIC_FIELDS)
+        .eq("role", "student")
+        .execute()
     )
-    all_students = all_students_res.data if all_students_res.data else []
+    all_students = all_students_res.data or []
+
+    announcements_res = (
+        supabase.table("class_announcements")
+        .select("*")
+        .eq("class_id", class_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    announcements = announcements_res.data or []
 
     return jsonify(
         {
             "class": class_res.data,
             "students": enrolled_students,
             "all_students": all_students,
+            "announcements": announcements,
         }
     )
 
 
-# Add student to class
 @app.post("/admin/classes/<int:class_id>/add-student")
 @require_auth(role="admin")
 def add_student_to_class(class_id):
     data = request.get_json() or {}
     student_id = data.get("student_id")
-
     if not student_id:
         return jsonify({"error": "Student ID is required"}), 400
 
-    # Check if class exists
     class_res = (
         supabase.table("classes")
-        .select("*")
+        .select("id")
         .eq("id", class_id)
         .maybe_single()
         .execute()
     )
-    if not class_res.data:
+    if not class_res or not class_res.data:
         return jsonify({"error": "Class not found"}), 404
 
-    # Check if student exists
     student_res = (
         supabase.table("users")
-        .select("*")
+        .select("id")
         .eq("id", student_id)
         .eq("role", "student")
         .maybe_single()
         .execute()
     )
-    if not student_res.data:
+    if not student_res or not student_res.data:
         return jsonify({"error": "Student not found"}), 404
 
-    # Check if student is already enrolled
-    existing_enrollment = (
+    existing = (
         supabase.table("class_enrollments")
-        .select("*")
+        .select("id")
         .eq("class_id", class_id)
         .eq("student_id", student_id)
         .execute()
     )
-
-    if existing_enrollment.data:
+    if existing.data:
         return jsonify({"error": "Student is already enrolled in this class"}), 400
 
-    # Add student to class
     enrollment_res = (
         supabase.table("class_enrollments")
-        .insert(
-            {
-                "class_id": class_id,
-                "student_id": student_id,
-            }
-        )
+        .insert({"class_id": class_id, "student_id": student_id})
         .execute()
     )
-
     if not enrollment_res.data:
         return jsonify({"error": "Failed to add student to class"}), 500
 
     return jsonify({"ok": True, "message": "Student added successfully"}), 201
 
 
-# Remove student from class
 @app.post("/admin/classes/<int:class_id>/remove-student")
 @require_auth(role="admin")
 def remove_student_from_class(class_id):
-    data = request.json
+    data = request.get_json() or {}
     student_id = data.get("student_id")
-
     if not student_id:
         return jsonify({"error": "Student ID is required"}), 400
 
-    # Remove enrollment
     supabase.table("class_enrollments").delete().eq("class_id", class_id).eq(
         "student_id", student_id
     ).execute()
@@ -492,12 +475,13 @@ def remove_student_from_class(class_id):
     return jsonify({"ok": True})
 
 
-# Student Class Request route
-@app.route("/classes/request", methods=["POST"])
+# ── Student class requests ──────────────────────────────────────────────────
+@app.post("/classes/request")
 @require_auth(role="student")
 def request_class():
-    data = request.json
-    user_id = request.user["sub"]
+    """Bulk request for weekly classes (no specific date/time)."""
+    data = request.get_json() or {}
+    user_id = _current_user_id()
 
     class_ids = data.get("selectedClasses", [])
     extra_details = data.get("extraDetails", "")
@@ -505,89 +489,55 @@ def request_class():
     if not class_ids:
         return jsonify({"error": "No classes selected"}), 400
 
-    res = (
-        supabase.table("class_requests")
-        .insert(
-            {
-                "student_id": user_id,
-                "class_ids": class_ids,  # array of integers
-                "status": "pending",
-                "extra_details": extra_details,
-            }
-        )
-        .execute()
-    )
+    supabase.table("class_requests").insert(
+        {
+            "student_id": user_id,
+            "class_ids": class_ids,
+            "status": "pending",
+            "extra_details": extra_details,
+        }
+    ).execute()
 
     return jsonify({"ok": True})
 
 
-# For other lessons (One - One etc..)
 @app.post("/classes/request-lesson")
 @require_auth(role="student")
 def request_lesson():
+    """Single one-off lesson booking with a specific date and time."""
     data = request.get_json() or {}
-    user_id = request.user["sub"]
+    user_id = _current_user_id()
 
     class_id = data.get("class_id")
-    requested_date = data.get("date")
-    requested_time = data.get("time")
+    date = data.get("date")
+    time = data.get("time")
     extra_details = data.get("extra_details", "")
 
-    if not class_id or not requested_date or not requested_time:
-        return jsonify({"error": "Class, date and time are required"}), 400
+    if not class_id or not date or not time:
+        return jsonify({"error": "class_id, date and time are required"}), 400
 
-    # Always store as integer array
-    class_ids = [str(class_id)]
+    supabase.table("class_requests").insert(
+        {
+            "student_id": user_id,
+            "class_ids": [class_id],
+            "status": "pending",
+            "extra_details": extra_details,
+            "date": date,
+            "time": time,
+        }
+    ).execute()
 
-    today = date.today().isoformat()
-
-    # Prevent duplicate pending requests
-    existing = (
-        supabase.table("class_requests")
-        .select("id, date")
-        .eq("student_id", user_id)
-        .in_("status", ["pending", "accepted"])
-        .gte("date", today)
-        .execute()
-    )
-
-    if existing:
-        return (
-            jsonify(
-                {
-                    "error": "You already have an active one-to-one lesson. You can request another once it has been completed."
-                }
-            ),
-            400,
-        )
-
-    res = (
-        supabase.table("class_requests")
-        .insert(
-            {
-                "student_id": user_id,
-                "class_ids": class_ids,
-                "date": requested_date,
-                "time": requested_time,
-                "extra_details": extra_details,
-                "status": "pending",
-            }
-        )
-        .execute()
-    )
-
-    return jsonify({"ok": True, "request": res.data[0]}), 201
+    return jsonify({"ok": True})
 
 
-# Admin Approval Route
 @app.post("/admin/requests/approve")
 @require_auth(role="admin")
 def approve_request():
-    data = request.json
+    data = request.get_json() or {}
+    req_id = data.get("request_id")
+    if not req_id:
+        return jsonify({"error": "request_id is required"}), 400
 
-    req_id = data["request_id"]
-
-    # Get request
     req = (
         supabase.table("class_requests")
         .select("*")
@@ -595,23 +545,36 @@ def approve_request():
         .maybe_single()
         .execute()
     )
-    if not req.data:
+    if not req or not req.data:
         return jsonify({"error": "Request not found"}), 404
-    student_id = req.data["student_id"]
-    class_ids = req.data["class_ids"]  # This is an array
 
-    # Mark request accepted
+    if req.data.get("status") != "pending":
+        return jsonify({"error": "Request is not pending"}), 400
+
+    student_id = req.data["student_id"]
+    class_ids = req.data.get("class_ids") or []
+
     supabase.table("class_requests").update({"status": "accepted"}).eq(
         "id", req_id
     ).execute()
 
-    # Create enrollments for each class (schema uses student_id)
-    enrollments = [
-        {"student_id": student_id, "class_id": class_id} for class_id in class_ids
-    ]
-
-    if enrollments:
-        supabase.table("class_enrollments").insert(enrollments).execute()
+    # Skip classes the student is already enrolled in to avoid duplicates.
+    if class_ids:
+        existing_res = (
+            supabase.table("class_enrollments")
+            .select("class_id")
+            .eq("student_id", student_id)
+            .in_("class_id", class_ids)
+            .execute()
+        )
+        already = {e["class_id"] for e in (existing_res.data or [])}
+        new_enrollments = [
+            {"student_id": student_id, "class_id": cid}
+            for cid in class_ids
+            if cid not in already
+        ]
+        if new_enrollments:
+            supabase.table("class_enrollments").insert(new_enrollments).execute()
 
     return jsonify({"ok": True})
 
@@ -619,8 +582,10 @@ def approve_request():
 @app.post("/admin/requests/reject")
 @require_auth(role="admin")
 def reject_request():
-    data = request.json
-    req_id = data["request_id"]
+    data = request.get_json() or {}
+    req_id = data.get("request_id")
+    if not req_id:
+        return jsonify({"error": "request_id is required"}), 400
 
     supabase.table("class_requests").update({"status": "rejected"}).eq(
         "id", req_id
@@ -629,27 +594,24 @@ def reject_request():
     return jsonify({"ok": True})
 
 
-# Get single class details with announcements for student
+# ── Student class detail ────────────────────────────────────────────────────
 @app.get("/student/classes/<int:class_id>")
 @require_auth(role="student")
 def get_student_class_details(class_id):
     try:
-        user_id = request.user["sub"]
+        user_id = _current_user_id()
 
-        # Check if student is enrolled in this class
         enrollment_res = (
             supabase.table("class_enrollments")
-            .select("*")
+            .select("id")
             .eq("student_id", user_id)
             .eq("class_id", class_id)
-            .maybe_single()
+            .limit(1)
             .execute()
         )
-
         if not enrollment_res.data:
             return jsonify({"error": "You are not enrolled in this class"}), 403
 
-        # Get class details
         class_res = (
             supabase.table("classes")
             .select("*")
@@ -657,11 +619,9 @@ def get_student_class_details(class_id):
             .maybe_single()
             .execute()
         )
-
-        if not class_res.data:
+        if not class_res or not class_res.data:
             return jsonify({"error": "Class not found"}), 404
 
-        # Get announcements for this class
         announcements_res = (
             supabase.table("class_announcements")
             .select("*")
@@ -669,103 +629,29 @@ def get_student_class_details(class_id):
             .order("created_at", desc=True)
             .execute()
         )
-        announcements = announcements_res.data if announcements_res.data else []
 
         return jsonify(
             {
                 "class": class_res.data,
-                "announcements": announcements,
+                "announcements": announcements_res.data or [],
             }
         )
     except Exception as e:
-        print(f"Error in get_student_class_details: {str(e)}")
         import traceback
 
         traceback.print_exc()
         return jsonify({"error": f"Failed to load class details: {str(e)}"}), 500
 
 
-# Get student's classes with announcements
-@app.get("/student/classes")
-@require_auth(role="student")
-def get_student_classes():
-    try:
-        user_id = request.user["sub"]
-
-        # Get enrolled classes
-        enrollments_res = (
-            supabase.table("class_enrollments")
-            .select("*")
-            .eq("student_id", user_id)
-            .execute()
-        )
-        enrollments = enrollments_res.data if enrollments_res.data else []
-
-        # Get class IDs
-        class_ids = [e["class_id"] for e in enrollments if e.get("class_id")]
-
-        classes_with_announcements = []
-
-        if class_ids:
-            # Fetch class details
-            classes_res = (
-                supabase.table("classes").select("*").in_("id", class_ids).execute()
-            )
-            classes_data = classes_res.data if classes_res.data else []
-
-            # Fetch announcements for all classes
-            announcements_res = (
-                supabase.table("class_announcements")
-                .select("*")
-                .in_("class_id", class_ids)
-                .order("created_at", desc=True)
-                .execute()
-            )
-            announcements_data = (
-                announcements_res.data if announcements_res.data else []
-            )
-
-            # Group announcements by class_id
-            announcements_by_class = {}
-            for ann in announcements_data:
-                class_id = ann.get("class_id")
-                if class_id not in announcements_by_class:
-                    announcements_by_class[class_id] = []
-                announcements_by_class[class_id].append(ann)
-
-            # Combine classes with their announcements
-            for class_data in classes_data:
-                class_id = class_data.get("id")
-                classes_with_announcements.append(
-                    {
-                        "id": class_id,
-                        "title": class_data.get("title", ""),
-                        "day": class_data.get("day", ""),
-                        "time": class_data.get("time", ""),
-                        "description": class_data.get("description", ""),
-                        "meeting_link": class_data.get("meeting_link", ""),
-                        "announcements": announcements_by_class.get(class_id, []),
-                    }
-                )
-
-        return jsonify({"classes": classes_with_announcements})
-    except Exception as e:
-        print(f"Error in get_student_classes: {str(e)}")
-        import traceback
-
-        traceback.print_exc()
-        return jsonify({"error": f"Failed to load classes: {str(e)}"}), 500
-
-
-# TBC
+# ── Teacher / admin announcements ───────────────────────────────────────────
 @app.post("/teacher/class/announcement")
 @require_auth(role="admin")
 def post_announcement():
-    teacher_id = request.user["sub"]
-    data = request.get_json()
+    teacher_id = _current_user_id()
+    data = request.get_json() or {}
 
     class_id = data.get("class_id")
-    message = data.get("message")
+    message = (data.get("message") or "").strip()
 
     if not class_id or not message:
         return jsonify({"error": "Missing class_id or message"}), 400
@@ -776,7 +662,7 @@ def post_announcement():
         .execute()
     )
 
-    return jsonify({"ok": True, "announcement": result.data[0]})
+    return jsonify({"ok": True, "announcement": result.data[0] if result.data else None})
 
 
 if __name__ == "__main__":

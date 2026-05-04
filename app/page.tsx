@@ -1,119 +1,104 @@
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowBigDown, ArrowBigDownDashIcon } from "lucide-react";
-import QuickLinks from "./components/sections/home/QuickLinks";
 import Hero from "./components/sections/home/Hero";
 import About from "./components/sections/home/About";
+import QuickLinks from "./components/sections/home/QuickLinks";
 import Review from "./components/sections/home/Review";
 
 export default function Home() {
   return (
     <div className="min-h-screen w-full bg-[#FAF9F7]">
-      {/* Hero Section */}
+      {/* HERO (unchanged) */}
+
       <Hero />
-
-      {/* About Sheikha Section */}
-      <About />
-      {/* Quick Links Section */}
-      <QuickLinks />
-
-      {/* Reviews Section */}
-      <Review />
-      {/* Latest News/Course Announcement */}
-      <section className="py-20 px-6 bg-gradient-to-b from-[#F5F2EB] via-[#FAF9F7] to-[#F0EDE8]">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl text-[#5b56a5] mb-4 font-playfair-display">
-              Latest News
-            </h2>
-            <p className="text-gray-600 font-light">
-              Stay updated with our latest courses and announcements
+      <section className="border-t border-[#E5E0D9] bg-gradient-to-br from-[#F5F3F0] to-[#FAF9F7] px-6 md:px-[6vw] py-20">
+        <div className="flex justify-between items-baseline mb-12 flex-wrap gap-4">
+          <div>
+            <p className="text-[0.6rem] tracking-[0.22em] uppercase text-gray-400 mb-3 font-medium">
+              Why choose us
             </p>
+            <h2 className="font-['Cormorant_Garamond',serif] font-light text-[clamp(1.8rem,3vw,2.4rem)] text-[#0F3B56]">
+              Why Al Bayan Academy
+            </h2>
           </div>
-          <div className="bg-gradient-to-br from-[#FDFDFB] to-[#F8F6F2] p-8 md:p-10 rounded-xl shadow-lg border border-[#E5E0D9] hover:shadow-xl transition-all duration-200">
-            <div className="flex items-start gap-6">
-              <div className="shrink-0">
-                <div className="rounded-lg bg-white p-3 shadow-sm border border-[#E5E0D9]">
-                  <img
-                    src="/albayan.png"
-                    alt="AlBayan Academy Logo"
-                    className="h-16 w-auto"
-                  />
-                </div>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-playfair-display text-[#0F3B56] mb-3">
-                  New Course: Advanced Tajweed
-                </h3>
-                <p className="text-gray-700 mb-6 font-light leading-relaxed">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Aenean non metus sed felis rhoncus molestie et cursus magna.
-                  Nam luctus diam in ultricies rutrum. Sed non vehicula nisi,
-                  tristique mollis libero. Nulla sollicitudin vulputate dolor ut
-                  interdum.
-                </p>
-                <div className="flex items-center gap-6 pt-4 border-t border-[#E5E0D9]">
-                  <Link
-                    href="/classes"
-                    className="text-[#5b56a5] font-medium hover:text-[#7a74cd] underline decoration-2 underline-offset-4 transition-colors flex items-center gap-2"
-                  >
-                    Learn more
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </Link>
-                  <span className="text-sm text-gray-500">
-                    {new Date("2024-11-29").toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                </div>
-              </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 border border-[#E5E0D9] divide-x divide-y divide-[#E5E0D9]">
+          {[
+            {
+              num: "01",
+              title: "Authentic Scholarship",
+              desc: "Every teacher holds a recognised Ijazah with an unbroken chain of transmission tracing back to the Prophet ﷺ.",
+            },
+            {
+              num: "02",
+              title: "25+ Years Experience",
+              desc: "Ustatha Bayan Hawwa has spent over two decades teaching students of all levels, from complete beginners to those seeking Ijazah.",
+            },
+            {
+              num: "03",
+              title: "Flexible & Online",
+              desc: "Classes run throughout the week with morning and evening sessions, accessible from anywhere in the world via Zoom.",
+            },
+            {
+              num: "04",
+              title: "Small Class Groups",
+              desc: "Intimate group sizes of 10 to 15 students ensure every student receives individual correction and attention.",
+            },
+            {
+              num: "05",
+              title: "Structured Pathway",
+              desc: "From foundational Tajweed through to Hifz and Ijazah preparation, every programme follows a clear and proven curriculum.",
+            },
+            {
+              num: "06",
+              title: "Proven Results",
+              desc: "Nearly fifty students have completed their Ijazah under Ustatha Bayan's supervision and gone on to teach within their own communities.",
+            },
+          ].map((item) => (
+            <div
+              key={item.num}
+              className="p-8 bg-white hover:bg-[#F8F6F2] transition-colors duration-300 group"
+            >
+              <span className="font-['Cormorant_Garamond',serif] text-4xl font-light text-[#5b56a5]/20 leading-none block mb-5 group-hover:text-[#5b56a5]/40 transition-colors duration-300">
+                {item.num}
+              </span>
+              <h3 className="font-['Cormorant_Garamond',serif] text-[1.1rem] text-[#0F3B56] mb-2">
+                {item.title}
+              </h3>
+              <p className="text-[0.85rem] leading-[1.8] text-gray-500">
+                {item.desc}
+              </p>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 px-6 bg-gradient-to-br from-[#5b56a5] via-[#4f4a94] to-[#2C5F7C]">
+      {/* ABOUT */}
+      <About />
+
+      {/* QUICK LINKS */}
+      <QuickLinks />
+
+      {/* REVIEWS */}
+      <Review />
+
+      {/* CTA */}
+      <section className="py-24 px-6 bg-gradient-to-br from-[#5b56a5] to-[#4f4a94]">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-playfair-display text-white mb-6">
-            Ready to Begin Your Journey?
+          <h2 className="text-4xl font-playfair-display text-white mb-6">
+            Begin Your Qur’an Journey
           </h2>
-          <p className="text-xl text-gray-100 mb-10 font-light max-w-2xl mx-auto">
-            View the classes we have to offer and take your first steps toward
-            a deeper connection with the Qur'an.
+
+          <p className="text-gray-100 mb-10 max-w-xl mx-auto">
+            Explore our classes and take the next step toward strengthening your
+            recitation and understanding.
           </p>
+
           <Link
             href="/classes"
-            className="inline-flex items-center gap-2 bg-white text-[#5b56a5] px-10 py-4 rounded-lg font-medium hover:bg-[#F0EDE8] transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 duration-200"
+            className="inline-flex items-center gap-2 bg-white text-[#5b56a5] px-8 py-4 rounded-lg font-medium hover:bg-[#F0EDE8] transition"
           >
-            View All Classes
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            View Classes →
           </Link>
         </div>
       </section>

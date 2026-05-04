@@ -1,31 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import { Label } from "@/app/components/ui/label";
+import { useEffect, useState } from "react";
+import { API_URL } from "@/lib/api";
+import { useRouter } from "next/navigation";
 import { Textarea } from "@/app/components/ui/textarea";
-import { Button } from "@/app/components/ui/button";
 import Loading from "@/app/components/ui/loading";
 
 const weeklyClasses = [
-  { id: 1, day: "Monday", time: "10:00", capacity: "15" },
-  { id: 2, day: "Wednesday", time: "10:00", capacity: "15" },
-  { id: 3, day: "Wednesday", time: "19:00", capacity: "15" },
-  { id: 4, day: "Thursday", time: "10:00", capacity: "15" },
-  { id: 5, day: "Thursday", time: "19:00", capacity: "15" },
-  { id: 6, day: "Friday", time: "10:00", capacity: "15" },
-  { id: 7, day: "Friday", time: "19:00", capacity: "15" },
+  { id: 1, day: "Monday", time: "10:00" },
+  { id: 2, day: "Wednesday", time: "10:00" },
+  { id: 3, day: "Wednesday", time: "19:00" },
+  { id: 4, day: "Thursday", time: "10:00" },
+  { id: 5, day: "Thursday", time: "19:00" },
+  { id: 6, day: "Friday", time: "10:00" },
+  { id: 7, day: "Friday", time: "19:00" },
 ];
 
+function SectionLabel({ label }: { label: string }) {
+  return (
+    <p className="text-[0.6rem] tracking-[0.22em] uppercase text-gray-400 mb-3 font-medium">
+      {label}
+    </p>
+  );
+}
+
 export default function BookClassesPage() {
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
   const [selected, setSelected] = useState<number[]>([]);
   const [extra, setExtra] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  useEffect(() => {
+    fetch(`${API_URL}/auth/me`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.authenticated) {
+          router.replace("/login");
+        } else {
+          setAuthChecked(true);
+        }
+      })
+      .catch(() => router.replace("/login"));
+  }, [router]);
+
   function toggle(id: number) {
+    setError(null);
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   }
 
@@ -34,22 +58,19 @@ export default function BookClassesPage() {
       setError("Please select at least one class.");
       return;
     }
-
     setError(null);
     setSuccess(false);
     setLoading(true);
 
-    const payload = {
-      selectedClasses: selected,
-      extraDetails: extra,
-    };
-
     try {
-      const res = await fetch("http://127.0.0.1:5000/classes/request", {
+      const res = await fetch(`${API_URL}/classes/request`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          selectedClasses: selected,
+          extraDetails: extra,
+        }),
       });
 
       if (!res.ok) {
@@ -60,7 +81,7 @@ export default function BookClassesPage() {
       setSuccess(true);
       setSelected([]);
       setExtra("");
-      setTimeout(() => setSuccess(false), 3000);
+      setTimeout(() => router.push("/dashboard"), 1200);
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -68,169 +89,183 @@ export default function BookClassesPage() {
     }
   }
 
+  if (!authChecked) return <Loading />;
+
   return (
-    <section
-      className="min-h-screen w-full py-16 px-6"
-      style={{ backgroundColor: "#FAF9F7" }}
-    >
-      <div
-        className="max-w-3xl mx-auto space-y-10 bg-white p-8 rounded-xl shadow-lg border"
-        style={{ borderColor: "#E5E0D9" }}
-      >
-        {/* TITLE */}
-        <div className="text-center">
-          <h1
-            className="text-4xl font-playfair-display mb-3"
-            style={{ color: "#5b56a5" }}
-          >
-            Book Weekly Classes
-          </h1>
-          <p className="text-gray-700 font-light text-md">
-            Select the class times you want to attend.
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#FAF9F7]">
+      {/* ── HERO ── */}
+      <section className="bg-gradient-to-b from-[#F5F3F0] to-[#FAF9F7] px-6 md:px-[6vw] pt-[16vh] pb-16">
+        <p className="flex items-center gap-4 text-[#5b56a5] text-[0.65rem] tracking-[0.25em] uppercase mb-6 font-medium">
+          <span className="w-8 h-px bg-[#5b56a5]" />
+          Al Bayan Academy
+        </p>
+        <h1 className="font-['Cormorant_Garamond',serif] font-light text-[clamp(2.8rem,6vw,5rem)] leading-[1.05] text-[#0F3B56] mb-4 max-w-2xl">
+          Book <span className="italic text-[#5b56a5]">Weekly Classes</span>
+        </h1>
+        <p className="text-[0.95rem] leading-[1.85] text-gray-500 max-w-lg">
+          Select the sessions you'd like to attend and submit your request.
+          You'll be notified once it's approved.
+        </p>
+      </section>
 
-        <hr style={{ borderColor: "#E5E0D9" }} />
+      {/* ── CONTENT ── */}
+      <section className="border-t border-[#E5E0D9] px-6 md:px-[6vw] py-16 grid lg:grid-cols-3 gap-12">
+        {/* Left — class selection */}
+        <div className="lg:col-span-2 space-y-10">
+          <div>
+            <SectionLabel label="Available sessions" />
+            <h2 className="font-['Cormorant_Garamond',serif] font-light text-[clamp(1.5rem,3vw,2rem)] text-[#0F3B56] mb-8">
+              Select your classes
+            </h2>
 
-        {/* CLASS CARDS */}
-        <div className="grid md:grid-cols-2 gap-4">
-          {weeklyClasses.map((c) => {
-            const active = selected.includes(c.id);
-
-            return (
-              <label
-                key={c.id}
-                onClick={() => toggle(c.id)}
-                className={`
-                  cursor-pointer p-5 rounded-xl border-2 transition-all duration-200 flex justify-between items-center group
-                  ${active ? "scale-[1.01] shadow-md" : "hover:shadow-sm"}
-                `}
-                style={{
-                  backgroundColor: active ? "#5b56a5" : "white",
-                  borderColor: active ? "#5b56a5" : "#E5E0D9",
-                  color: active ? "white" : "#1f2937",
-                }}
-              >
-                <div>
-                  <p className=" text-base">{c.day}</p>
-                  <p
-                    className="text-sm"
-                    style={{
-                      opacity: active ? 0.9 : 1,
-                      color: active ? "white" : "#6b7280",
-                    }}
+            <div className="grid sm:grid-cols-2 border border-[#E5E0D9] divide-x divide-y divide-[#E5E0D9]">
+              {weeklyClasses.map((c) => {
+                const active = selected.includes(c.id);
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => toggle(c.id)}
+                    className={`p-6 text-left transition-colors duration-200 flex items-center justify-between group ${
+                      active ? "bg-[#5b56a5]" : "bg-white hover:bg-[#F8F6F2]"
+                    }`}
                   >
-                    {c.time}
-                  </p>
-                </div>
+                    <div>
+                      <p
+                        className={`font-['Cormorant_Garamond',serif] text-[1.1rem] mb-1 ${active ? "text-white" : "text-[#0F3B56]"}`}
+                      >
+                        {c.day}
+                      </p>
+                      <p
+                        className={`text-[0.75rem] tracking-[0.1em] uppercase font-medium ${active ? "text-white/70" : "text-gray-400"}`}
+                      >
+                        {c.time}
+                      </p>
+                    </div>
 
-                {/* Tick */}
-                <div
-                  className={`
-                    h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all
-                  `}
-                  style={{
-                    backgroundColor: active ? "white" : "#f9fafb",
-                    borderColor: active ? "white" : "#d1d5db",
-                    color: active ? "#16a34a" : "transparent",
-                  }}
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="3"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-              </label>
-            );
-          })}
-        </div>
-
-        {/* EXTRA DETAILS */}
-        <div className="space-y-2">
-          <Label className="font-medium">Extra Details</Label>
-          <Textarea
-            placeholder="Anything you want to add or request"
-            value={extra}
-            onChange={(e) => setExtra(e.target.value)}
-            className="focus-visible:ring-[#5b56a5] focus-visible:border-[#5b56a5] bg-[#F5F3F0]"
-            style={{
-              borderColor: "#E5E0D9",
-            }}
-          />
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
-            <svg
-              className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <p className="text-red-800 text-sm">{error}</p>
+                    {/* Checkbox */}
+                    <div
+                      className={`w-5 h-5 border flex items-center justify-center transition-colors ${
+                        active
+                          ? "bg-white border-white"
+                          : "bg-[#F5F3F0] border-[#E5E0D9] group-hover:border-[#5b56a5]/40"
+                      }`}
+                    >
+                      {active && (
+                        <svg
+                          className="w-3 h-3 text-[#5b56a5]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        )}
 
-        {/* Success Message */}
-        {success && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
-            <svg
-              className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            <p className="text-green-800 text-sm">
-              Request submitted successfully!
+          {/* Extra details */}
+          <div>
+            <SectionLabel label="Optional" />
+            <h2 className="font-['Cormorant_Garamond',serif] font-light text-[1.2rem] text-[#0F3B56] mb-4">
+              Additional details
+            </h2>
+            <Textarea
+              placeholder="Anything you'd like to add or request..."
+              value={extra}
+              onChange={(e) => setExtra(e.target.value)}
+              className="bg-[#F5F3F0] border-[#E5E0D9] rounded-none focus-visible:ring-[#5b56a5]/30 min-h-[100px] text-[0.9rem]"
+            />
+          </div>
+        </div>
+
+        {/* Right — summary & submit */}
+        <div className="space-y-6">
+          <div className="border border-[#E5E0D9] bg-white top-24">
+            <div className="px-6 py-5 border-b border-[#E5E0D9]">
+              <SectionLabel label="Your request" />
+              <h3 className="font-['Cormorant_Garamond',serif] font-light text-xl text-[#0F3B56]">
+                Summary
+              </h3>
+            </div>
+
+            <div className="divide-y divide-[#E5E0D9]">
+              {/* Selected count */}
+              <div className="px-6 py-4 flex justify-between items-center">
+                <p className="text-[0.8rem] text-gray-500">Classes selected</p>
+                <p className="font-['Cormorant_Garamond',serif] text-2xl font-light text-[#5b56a5]">
+                  {selected.length}
+                </p>
+              </div>
+
+              {/* Selected list */}
+              {selected.length > 0 && (
+                <div className="px-6 py-4 space-y-2">
+                  {selected.map((id) => {
+                    const c = weeklyClasses.find((x) => x.id === id);
+                    if (!c) return null;
+                    return (
+                      <div
+                        key={id}
+                        className="flex items-center justify-between"
+                      >
+                        <p className="text-[0.85rem] text-[#0F3B56]">{c.day}</p>
+                        <p className="text-[0.75rem] text-gray-400 tracking-wide">
+                          {c.time}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Messages */}
+              {error && (
+                <div className="px-6 py-4 bg-red-50 text-[0.8rem] text-red-800 border-red-100">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="px-6 py-4 bg-green-50 text-[0.8rem] text-green-800">
+                  Request submitted successfully!
+                </div>
+              )}
+
+              {/* Submit */}
+              <div className="px-6 py-5">
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading || success}
+                  className="w-full py-3 bg-[#5b56a5] text-white text-[0.75rem] tracking-[0.12em] uppercase font-medium hover:bg-[#4f4a94] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading
+                    ? "Submitting..."
+                    : success
+                      ? "Submitted!"
+                      : `Submit Request${selected.length > 0 ? ` (${selected.length})` : ""}`}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Info note */}
+          <div className="border border-[#E5E0D9] bg-white px-6 py-5">
+            <SectionLabel label="Note" />
+            <p className="text-[0.8rem] text-gray-500 leading-relaxed">
+              Your request will be reviewed by the admin. See student handbook
+              for further information.
             </p>
           </div>
-        )}
-
-        {/* SUBMIT BUTTON */}
-        <Button
-          onClick={handleSubmit}
-          disabled={loading || success}
-          className="w-full py-3 text-white text-base font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-          style={{
-            backgroundColor: loading || success ? "#a3a3a3" : "#5b56a5",
-          }}
-        >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              Submitting...
-            </span>
-          ) : success ? (
-            "Submitted!"
-          ) : (
-            `Submit ${selected.length > 0 ? `(${selected.length})` : ""}`
-          )}
-        </Button>
-      </div>
-    </section>
+        </div>
+      </section>
+    </div>
   );
 }

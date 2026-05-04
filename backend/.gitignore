@@ -11,4 +11,4 @@ ENV/
 *.sqlite
 .env
 instance/
-
+.env.local
