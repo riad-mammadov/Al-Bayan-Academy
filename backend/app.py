@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import jwt
@@ -14,12 +16,23 @@ from auth import (
 )
 
 
+# ── Environment-driven config ───────────────────────────────────────────────
+# Set ALLOWED_ORIGINS (comma-separated) on Render once the Vercel URL is known.
+# Defaults are local dev.
+_default_origins = "http://127.0.0.1:3000,http://localhost:3000"
+ALLOWED_ORIGINS = [
+    o.strip() for o in os.getenv("ALLOWED_ORIGINS", _default_origins).split(",") if o.strip()
+]
+
+# Set PRODUCTION=true on Render so cookies use secure=True, samesite="None"
+# (required for cross-domain auth between Vercel + Render).
+IS_PRODUCTION = os.getenv("PRODUCTION", "false").lower() == "true"
+COOKIE_SECURE = IS_PRODUCTION
+COOKIE_SAMESITE = "None" if IS_PRODUCTION else "Lax"
+
+
 app = Flask(__name__)
-CORS(
-    app,
-    supports_credentials=True,
-    origins=["http://127.0.0.1:3000", "http://localhost:3000"],
-)
+CORS(app, supports_credentials=True, origins=ALLOWED_ORIGINS)
 
 # Fields to return from the users table; never include password_hash.
 USER_PUBLIC_FIELDS = "id,name,email,role,created_at"
@@ -33,8 +46,8 @@ def _set_auth_cookie(resp, token):
         AUTH_COOKIE_NAME,
         token,
         httponly=True,
-        samesite="Lax",
-        secure=False,  # TODO: set True behind HTTPS in production
+        samesite=COOKIE_SAMESITE,
+        secure=COOKIE_SECURE,
         max_age=AUTH_COOKIE_MAX_AGE,
         path="/",
     )
@@ -45,8 +58,8 @@ def _clear_auth_cookie(resp):
         AUTH_COOKIE_NAME,
         "",
         httponly=True,
-        samesite="Lax",
-        secure=False,
+        samesite=COOKIE_SAMESITE,
+        secure=COOKIE_SECURE,
         expires=0,
         max_age=0,
         path="/",
